@@ -35,8 +35,9 @@ data_template = {
 				'is_html_enabled': True,
 				'sample_size': 0,               # len of 'options' list
 				'is_multiple_choice': False,
-				'preserve_order': False
-			}
+				'preserve_order': False,
+                'is_options_feedback': False  # https://github.com/StepicOrg/Stepik-API/issues/67
+            }
 		},
 		'lesson': None,
 		'position': None
