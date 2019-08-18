@@ -17,3 +17,12 @@ Text for step 1.
 Текст.
 
 * Еще текст.
+
+## QUIZ 
+
+Это вопрос в формате AIKEN.
+
+A) ответ 1
+B) answer 2
+
+ANSWER: B
