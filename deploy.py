@@ -35,6 +35,15 @@ def commit_step(steps, lesson_id, lines):
     print(st)
     steps.append(st)
 
+def commit_whole_file_as_1_step(steps, lesson_id, lines):
+    """All steps in the first step to rereading"""
+    st = Step()
+    st.text = md_utils.html('\n'.join(lines))
+    st.lesson_id = lesson_id
+    st.position = len(steps) + 1
+    print(st)
+    steps.append(st)
+
 
 def parse_lesson(lines):
     """
@@ -80,8 +89,11 @@ def parse_lesson(lines):
             if not m:
                 error(f'Expect lesson header # text, status={status}, now = {line}')
             lesson_id = int(m.group(2))
+            print(f'lesson_id={lesson_id}')
             status = Status.LESSON_TEXT
             line_from = line_to
+            # add whole file as the first step:
+            commit_whole_file_as_1_step(steps, lesson_id, lines)
 
         elif status == Status.LESSON_TEXT:                          # text before first h2
             if re.match(r'##[^#]', line):
@@ -111,7 +123,7 @@ def deploy_to_stepik(steps, lesson_id):
     for step_id, step in zip(step_ids, steps):
         step.id = step_id
         print('UPDATE', step)
-        #step.update()
+        step.update()
 
     # create (add) new steps if needed
     if len_site < len_data:
