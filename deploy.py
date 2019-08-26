@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Main file to deploy markdown file into site
 
@@ -38,7 +39,7 @@ def commit_step(steps, lesson_id, lines):
 def commit_whole_file_as_1_step(steps, lesson_id, lines):
     """All steps in the first step to rereading"""
     st = Step()
-    st.text = md_utils.html('\n'.join(lines))
+    st.text = md_utils.html(lines)
     st.lesson_id = lesson_id
     st.position = len(steps) + 1
     print(st)

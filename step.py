@@ -81,7 +81,7 @@ class Step:
             st = StepMultipleChoice.from_aiken(lines[1:])
         else:                                       # Text
             st = Step()
-            st.text = html('\n'.join(lines))
+            st.text = html(lines)
         return st
 
 
@@ -200,7 +200,7 @@ class StepMultipleChoice(Step):
                 md_part = [txt]
                 letter_seq.append(letter)
             else:
-                m_answer = re.match(r'\s*ANSWER:\s*([A-Z])\s*', line)
+                m_answer = re.match(r'\s*ANSWER[:]*\s*([A-Z])\s*', line)
                 if m_answer and status == Status.VARIANT:
                     # end of question
                     st.add_option(md_part)
