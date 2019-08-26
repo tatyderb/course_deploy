@@ -189,7 +189,8 @@ class StepMultipleChoice(Step):
             if m:
                 letter = m.group(2)
                 sep = m.group(3)
-                txt = m.group(4)
+                txt = m.group(4)+'\n'
+
                 if status == Status.QUESTION:
                     # first answer begin, question end
                     status = Status.VARIANT
