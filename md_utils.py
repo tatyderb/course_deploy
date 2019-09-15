@@ -10,6 +10,7 @@ def html(text_md):
         text_md = ''.join(text_md)
     return markdown.markdown(
         text_md,
-        extensions=['extra', 'codehilite'],
+    #    extensions=['extra', 'codehilite'],
+        extensions=['extra'],
     #    output_format="html5"
     )
