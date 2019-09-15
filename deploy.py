@@ -94,7 +94,7 @@ def parse_lesson(lines):
             status = Status.LESSON_TEXT
             line_from = line_to
             # add whole file as the first step:
-            commit_whole_file_as_1_step(steps, lesson_id, lines)
+            # commit_whole_file_as_1_step(steps, lesson_id, lines)
 
         elif status == Status.LESSON_TEXT:                          # text before first h2
             if re.match(r'##[^#]', line):
@@ -138,18 +138,55 @@ def deploy_to_stepik(steps, lesson_id):
             print('DELETE', step_id)
             Step.delete_by_id(step_id)
 
+def print_to_html_file(md_filename, steps):
+    """
+    print text as html into html filename
+    """
+    filename = md_filename[:-2]+'html'
+    print(f'Save HTML into {filename}')
+    with open (filename, 'w', encoding='utf-8') as fout:
+        for st in steps:
+            fout.write(st.text)
 
 def usage():
     print(f'USAGE: {__file__} markdown_filename')
 
+
+# def main_old_argv():
+
 def main():
     """Read input file, split into steps, upload to site"""
-    if len(sys.argv) == 1:
-        usage()
-        sys.exit(1)
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Deploy markdown file into site or convert to html for manual deploying')
+    parser.add_argument('markdown_filename', metavar='FILE', type=str, help='input markdown file')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-f", "--full", action="store_true", help='deploy all steps')
+    group.add_argument("-t", "--text", action="store_true", help='deploy only text steps')
+    parser.add_argument('-d', '--debug', action='store_true', help='deploy all steps in the first one to debug formatting')
+    parser.add_argument('--html', action='store_true', help='deploy all steps into 1 HTML file, not to site')
+    args = parser.parse_args()
+
+    print('FILE =', args.markdown_filename)
+    if args.html:
+        print ('--html')
+    if args.debug:
+        print ('--html')
+    if args.full:
+        print('deploy full')
+    elif args.text:
+        print('deploy TEXT only')
+    else:
+        print('deploy nothing')
+    
+    '''
+    
     with open(sys.argv[1], encoding='utf-8') as fin:
         steps, lesson_header, lesson_id, lesson_text = parse_lesson(list(fin))
-        deploy_to_stepik(steps, lesson_id)
+        
+        #deploy_to_stepik(steps[1:], lesson_id)
+        print_to_html_file(sys.argv[1], steps)
+    '''
 
 if __name__ == '__main__':
     main()
