@@ -6,6 +6,8 @@ from auth_data import API_HOST, CLIENT_ID, CLIENT_SECRET
 
 import json
 import requests
+import sys
+import traceback
 
 # 2. Get a token
 def get_token(client_id=CLIENT_ID, client_secret=CLIENT_SECRET):
@@ -29,7 +31,14 @@ def update_object(object_name, object_id, data, token=token):
     # use PUT to update existing objects
     response = requests.put(api_url, headers={'Authorization': 'Bearer ' + token}, json=data)
     # status code should be 200 (HTTP OK)
-    assert(response.status_code == 200)
+    try:
+        assert(response.status_code == 200)
+    except AssertionError as e:
+        traceback.print_exc()
+        print(response.status_code)
+        print(response.content)
+        print(json.dumps(json.loads(response.content), indent=4))
+        sys.exit(1)
     object_id = response.json()[object_name][0]['id']
     return object_id
 
