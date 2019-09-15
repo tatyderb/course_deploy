@@ -12,10 +12,12 @@ markdown text
 question in AIKEN format
 """
 import md_utils
-from step import Step
+from step import Step, StepType
 
 from enum import Enum
 import json
+import os
+import os.path as op
 import pprint
 import re
 import sys
@@ -46,7 +48,7 @@ def commit_whole_file_as_1_step(steps, lesson_id, lines):
     steps.append(st)
 
 
-def parse_lesson(lines):
+def parse_lesson(lines, debug_format=False):
     """
     Parse lesson document by format:
     # lesson header
@@ -94,7 +96,8 @@ def parse_lesson(lines):
             status = Status.LESSON_TEXT
             line_from = line_to
             # add whole file as the first step:
-            # commit_whole_file_as_1_step(steps, lesson_id, lines)
+            if debug_format:
+                commit_whole_file_as_1_step(steps, lesson_id, lines)
 
         elif status == Status.LESSON_TEXT:                          # text before first h2
             if re.match(r'##[^#]', line):
@@ -116,47 +119,67 @@ def parse_lesson(lines):
     return steps, lesson_header, lesson_id, lesson_text
 
 
-def deploy_to_stepik(steps, lesson_id):
+def deploy_to_stepik(steps, lesson_id, allow_step_types = StepType.FULL):
     """Upload steps to site into lesson_id by update site steps, create or delete steps if needed."""
     step_ids = Step.get_step_ids_for_lesson(lesson_id)
     len_data = len(steps)
     len_site = len(step_ids)
     for step_id, step in zip(step_ids, steps):
         step.id = step_id
-        print('UPDATE', step)
-        step.update()
+        if step.step_type & allow_step_types:
+            print('UPDATE', step)
+            step.update()
+        else:
+            print(f'SKIP UPDATE hstep={st.id} position={st.position}')
+        
 
     # create (add) new steps if needed
     if len_site < len_data:
         for step in steps[len_site:]:
-            step.create()
-            print('CREATE', step)
+            if step.step_type & allow_step_types:
+                step.create()
+                print('CREATE', step)
+            else:
+                print(f'SKIP CREATE step={st.id} position={st.position}')
+            
 
     # delete obligatory steps if needed
     elif len_site > len_data:
         for step_id in step_ids[len_data:]:
-            print('DELETE', step_id)
-            Step.delete_by_id(step_id)
+            if step.step_type & allow_step_types:
+                print('DELETE', step_id)
+                Step.delete_by_id(step_id)
+            else:
+                print(f'SKIP DELETE step={st.id} position={st.position}')
+            
 
-def print_to_html_file(md_filename, steps):
+def print_to_html_file(md_filename, steps, allow_step_types = StepType.FULL):
     """
-    print text as html into html filename
+    print text as html into ./html directory
     """
-    filename = md_filename[:-2]+'html'
+    dir_part, file_part = op.split(md_filename)
+    dir_part = op.join(dir_part, 'html')
+    if not os.path.exists(dir_part):
+        os.mkdir(dir_part)
+    md_file, md_ext = op.splitext(file_part)
+    filename = op.join(dir_part, md_file+'.html')
     print(f'Save HTML into {filename}')
+    print('steps =', len(steps))
+    
     with open (filename, 'w', encoding='utf-8') as fout:
         for st in steps:
-            fout.write(st.text)
+            if st.step_type & allow_step_types:
+                # fout.write(st.text)
+                print(f'SAVE HTML step={st.id} position={st.position}')
+                fout.write(st.html())
+            else:
+                print(f'SKIP HTML step={st.id} position={st.position}')
 
-def usage():
-    print(f'USAGE: {__file__} markdown_filename')
-
-
-# def main_old_argv():
 
 def main():
     """Read input file, split into steps, upload to site"""
     import argparse
+    
     
     parser = argparse.ArgumentParser(description='Deploy markdown file into site or convert to html for manual deploying')
     parser.add_argument('markdown_filename', metavar='FILE', type=str, help='input markdown file')
@@ -171,22 +194,29 @@ def main():
     if args.html:
         print ('--html')
     if args.debug:
-        print ('--html')
+        print ('--debug')
+        
     if args.full:
         print('deploy full')
+        deployed_step_types = StepType.FULL
     elif args.text:
         print('deploy TEXT only')
+        deployed_step_types |= StepType.TEXT
     else:
-        print('deploy nothing')
+        print('deploy all by default')
+        deployed_step_types = StepType.FULL
     
-    '''
-    
-    with open(sys.argv[1], encoding='utf-8') as fin:
-        steps, lesson_header, lesson_id, lesson_text = parse_lesson(list(fin))
+    with open(args.markdown_filename, encoding='utf-8') as fin:
+        # First step - all other steps as one page if mode = DEBUG
+        steps, lesson_header, lesson_id, lesson_text = parse_lesson(list(fin), args.debug)
         
-        #deploy_to_stepik(steps[1:], lesson_id)
-        print_to_html_file(sys.argv[1], steps)
-    '''
+    
+    # only convert to html, no deploy to site
+    if args.html:
+        print_to_html_file(args.markdown_filename, steps, allow_step_types=deployed_step_types)
+    else:
+        deploy_to_stepik(steps, lesson_id, allow_step_types=deployed_step_types)
+
 
 if __name__ == '__main__':
     main()

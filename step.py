@@ -11,6 +11,13 @@ from pprint import pprint, pformat
 
 # POST and PUT requests for updata and create step with /api/step-sources/{step_id}
 
+class StepType:
+    TEXT = 1
+    QUESTION = 2
+    PROBLEM = 4
+    VIDEO = 8
+    SKIP = 0
+    FULL = TEXT | QUESTION | PROBLEM | VIDEO
 
 class Step:
     """ 1 step in stepik.org """
@@ -32,6 +39,7 @@ class Step:
         self.lesson_id = 0  # todo: lesson_id, should be filled, need for create and update requests
         self.position = 0   # step position in lesson, from 1
         self.text = ''
+        self.step_type = StepType.TEXT
         
     def __repr__(self):
         return repr(self.dict())
@@ -39,6 +47,11 @@ class Step:
     def __str__(self):
         #return pformat(self.dict())
         return str(self.dict())
+    
+     
+    def html(self):
+        """ Call if convert step into HTML file"""
+        return self.text
         
         
     def dict(self):
@@ -154,6 +167,7 @@ class StepMultipleChoice(Step):
         self.is_multiple_choice = False
         self.options = []
         self.name = 'choice'
+        self.step_type = StepType.QUESTION
 
     def add_option(self, variant_md):
         """
@@ -169,6 +183,20 @@ class StepMultipleChoice(Step):
         d['stepSource']['block']['source']['options'] = self.options
         d['stepSource']['block']['source']['sample_size'] = len(self.options)
         return d
+        
+        
+    def html(self):
+        HTML = '''
+<h2>QUESTION</h2>
+{question}
+{answers}
+CORRECT = {corrects}
+'''
+        question = self.text
+        answers = '\n'.join([letter+')\n'+o['text'] for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options )])
+        corrects = ' '.join([letter  for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options ) if o['is_correct']])
+        return HTML.format(question=question, answers=answers, corrects=corrects)
+        
 
 
     @staticmethod
