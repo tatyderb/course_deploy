@@ -167,11 +167,11 @@ def print_to_html_file(md_filename, steps, allow_step_types = StepType.FULL):
     print('steps =', len(steps))
     
     with open (filename, 'w', encoding='utf-8') as fout:
-        for st in steps:
+        for sti, st in enumerate(steps):
             if st.step_type & allow_step_types:
                 # fout.write(st.text)
                 print(f'SAVE HTML step={st.id} position={st.position}')
-                fout.write(st.html())
+                fout.write(st.html(sti+1))
             else:
                 print(f'SKIP HTML step={st.id} position={st.position}')
 

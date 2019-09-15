@@ -185,9 +185,13 @@ class StepMultipleChoice(Step):
         return d
         
         
-    def html(self):
+    def html(self, position=None):
+        if position is None:
+            position = ''
+        else:
+            position = str(position)
         HTML = '''
-<h2>QUESTION</h2>
+<h2>QUESTION {}</h2>
 {question}
 {answers}
 CORRECT = {corrects}
@@ -195,7 +199,7 @@ CORRECT = {corrects}
         question = self.text
         answers = '\n'.join([letter+')\n'+o['text'] for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options )])
         corrects = ' '.join([letter  for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options ) if o['is_correct']])
-        return HTML.format(question=question, answers=answers, corrects=corrects)
+        return HTML.format(position, question=question, answers=answers, corrects=corrects)
         
 
 
