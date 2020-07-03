@@ -131,7 +131,7 @@ def deploy_to_stepik(steps, lesson_id, st_num = 0, allow_step_types = StepType.F
         st_num = st_num - 1 if st_num > 0 else len_data + st_num
 
         if st_num >= len_site:
-            print('\nYou can\'t update step which wasn\'t uploaded before')
+            print("\nYou can't update step which wasn't uploaded before")
             return
 
         steps[st_num].id = step_ids[st_num]
@@ -207,7 +207,7 @@ def main():
     group.add_argument("-t", "--text", action="store_true", help='deploy only text steps')
     parser.add_argument('-d', '--debug', action='store_true', help='deploy all steps in the first one to debug formatting')
     parser.add_argument('--html', action='store_true', help='deploy all steps into 1 HTML file, not to site')
-    parser.add_argument('--step', type=int, default=0, help='deploy only the step which number you entered')
+    parser.add_argument('--step', type=int, default=0, help='update only the step N, start N from 1, negative numbers are allowed too')
     args = parser.parse_args()
 
     print('FILE =', args.markdown_filename)
