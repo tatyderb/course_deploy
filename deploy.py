@@ -139,7 +139,7 @@ def deploy_to_stepik(steps, lesson_id, st_num = 0, allow_step_types = StepType.F
             print('UPDATE', steps[ind])
             steps[ind].update()
         else:
-            print(f'SKIP UPDATE hstep={st.id} position={st.position}')
+            print(f'SKIP UPDATE hstep={steps[ind].id} position={steps[ind].position}')
         return
 
 
@@ -149,7 +149,7 @@ def deploy_to_stepik(steps, lesson_id, st_num = 0, allow_step_types = StepType.F
             print('UPDATE', step)
             step.update()
         else:
-            print(f'SKIP UPDATE hstep={st.id} position={st.position}')
+            print(f'SKIP UPDATE hstep={step.id} position={step.position}')
         
 
     # create (add) new steps if needed
@@ -159,7 +159,7 @@ def deploy_to_stepik(steps, lesson_id, st_num = 0, allow_step_types = StepType.F
                 step.create()
                 print('CREATE', step)
             else:
-                print(f'SKIP CREATE step={st.id} position={st.position}')
+                print(f'SKIP CREATE step={step.id} position={step.position}')
             
 
     # delete obligatory steps if needed
@@ -169,7 +169,7 @@ def deploy_to_stepik(steps, lesson_id, st_num = 0, allow_step_types = StepType.F
                 print('DELETE', step_id)
                 Step.delete_by_id(step_id)
             else:
-                print(f'SKIP DELETE step={st.id} position={st.position}')
+                print(f'SKIP DELETE step={step.id} position={step.position}')
             
 
 def print_to_html_file(md_filename, steps, allow_step_types = StepType.FULL):
