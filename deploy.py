@@ -128,16 +128,16 @@ def deploy_to_stepik(steps, lesson_id, st_num = 0, allow_step_types = StepType.F
 
     # update existing step when used "--step"
     if st_num != 0:
-        st_num = st_num - 1 if st_num > 0 else len_data + st_num
+        ind = st_num - 1 if st_num > 0 else len_data + st_num  # getting index from straight step number or negative st
 
-        if st_num >= len_site:
+        if ind >= len_site:
             print("\nYou can't update step which wasn't uploaded before")
             return
 
-        steps[st_num].id = step_ids[st_num]
-        if steps[st_num].step_type & allow_step_types:
-            print('UPDATE', steps[st_num])
-            steps[st_num].update()
+        steps[ind].id = step_ids[ind]
+        if steps[ind].step_type & allow_step_types:
+            print('UPDATE', steps[ind])
+            steps[ind].update()
         else:
             print(f'SKIP UPDATE hstep={st.id} position={st.position}')
         return
@@ -212,9 +212,9 @@ def main():
 
     print('FILE =', args.markdown_filename)
     if args.html:
-        print ('--html')
+        print('--html')
     if args.debug:
-        print ('--debug')
+        print('--debug')
         
     if args.full:
         print('deploy full')
