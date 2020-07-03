@@ -119,11 +119,26 @@ def parse_lesson(lines, debug_format=False):
     return steps, lesson_header, lesson_id, lesson_text
 
 
-def deploy_to_stepik(steps, lesson_id, allow_step_types = StepType.FULL):
+def deploy_to_stepik(steps, lesson_id, st_num = 0, allow_step_types = StepType.FULL):
     """Upload steps to site into lesson_id by update site steps, create or delete steps if needed."""
     step_ids = Step.get_step_ids_for_lesson(lesson_id)
     len_data = len(steps)
     len_site = len(step_ids)
+
+
+    # update existing step when used "--step"
+    if st_num != 0:
+        st_num = st_num - 1 if st_num > 0 else len_data + st_num
+
+        steps[st_num].id = step_ids[st_num]
+        if steps[st_num].step_type & allow_step_types:
+            print('UPDATE', steps[st_num])
+            steps[st_num].update()
+        else:
+            print(f'SKIP UPDATE hstep={st.id} position={st.position}')
+        return
+
+
     for step_id, step in zip(step_ids, steps):
         step.id = step_id
         if step.step_type & allow_step_types:
@@ -188,6 +203,7 @@ def main():
     group.add_argument("-t", "--text", action="store_true", help='deploy only text steps')
     parser.add_argument('-d', '--debug', action='store_true', help='deploy all steps in the first one to debug formatting')
     parser.add_argument('--html', action='store_true', help='deploy all steps into 1 HTML file, not to site')
+    parser.add_argument('--step', type=int, default=0, help='deploy only the step which number you entered')
     args = parser.parse_args()
 
     print('FILE =', args.markdown_filename)
@@ -215,7 +231,7 @@ def main():
     if args.html:
         print_to_html_file(args.markdown_filename, steps, allow_step_types=deployed_step_types)
     else:
-        deploy_to_stepik(steps, lesson_id, allow_step_types=deployed_step_types)
+        deploy_to_stepik(steps, lesson_id, st_num=args.step, allow_step_types=deployed_step_types)
 
 
 if __name__ == '__main__':
