@@ -119,11 +119,30 @@ def parse_lesson(lines, debug_format=False):
     return steps, lesson_header, lesson_id, lesson_text
 
 
-def deploy_to_stepik(steps, lesson_id, allow_step_types = StepType.FULL):
+def deploy_to_stepik(steps, lesson_id, st_num = 0, allow_step_types = StepType.FULL):
     """Upload steps to site into lesson_id by update site steps, create or delete steps if needed."""
     step_ids = Step.get_step_ids_for_lesson(lesson_id)
     len_data = len(steps)
     len_site = len(step_ids)
+
+
+    # update existing step when used "--step"
+    if st_num != 0:
+        ind = st_num - 1 if st_num > 0 else len_data + st_num  # getting index from straight step number or negative st
+
+        if ind >= len_site:
+            print("\nYou can't update step which wasn't uploaded before")
+            return
+
+        steps[ind].id = step_ids[ind]
+        if steps[ind].step_type & allow_step_types:
+            print('UPDATE', steps[ind])
+            steps[ind].update()
+        else:
+            print(f'SKIP UPDATE hstep={st.id} position={st.position}')
+        return
+
+
     for step_id, step in zip(step_ids, steps):
         step.id = step_id
         if step.step_type & allow_step_types:
@@ -188,13 +207,14 @@ def main():
     group.add_argument("-t", "--text", action="store_true", help='deploy only text steps')
     parser.add_argument('-d', '--debug', action='store_true', help='deploy all steps in the first one to debug formatting')
     parser.add_argument('--html', action='store_true', help='deploy all steps into 1 HTML file, not to site')
+    parser.add_argument('--step', type=int, default=0, help='update only the step N, start N from 1, negative numbers are allowed too')
     args = parser.parse_args()
 
     print('FILE =', args.markdown_filename)
     if args.html:
-        print ('--html')
+        print('--html')
     if args.debug:
-        print ('--debug')
+        print('--debug')
         
     if args.full:
         print('deploy full')
@@ -215,7 +235,7 @@ def main():
     if args.html:
         print_to_html_file(args.markdown_filename, steps, allow_step_types=deployed_step_types)
     else:
-        deploy_to_stepik(steps, lesson_id, allow_step_types=deployed_step_types)
+        deploy_to_stepik(steps, lesson_id, st_num=args.step, allow_step_types=deployed_step_types)
 
 
 if __name__ == '__main__':

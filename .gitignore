@@ -2,3 +2,4 @@ __pycache__
 .idea
 auth_data.py
 examples/html
+examples/lesson_try.md
