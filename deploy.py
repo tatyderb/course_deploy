@@ -130,6 +130,10 @@ def deploy_to_stepik(steps, lesson_id, st_num = 0, allow_step_types = StepType.F
     if st_num != 0:
         st_num = st_num - 1 if st_num > 0 else len_data + st_num
 
+        if st_num >= len_site:
+            print('\nYou can\'t update step which wasn\'t uploaded before')
+            return
+
         steps[st_num].id = step_ids[st_num]
         if steps[st_num].step_type & allow_step_types:
             print('UPDATE', steps[st_num])
