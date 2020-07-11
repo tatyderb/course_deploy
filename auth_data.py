@@ -15,11 +15,10 @@ API_HOST = 'https://stepik.org'
 
 CLIENT_ID = "..."
 CLIENT_SECRET = "..."
-course_id = 0
 
 
 def auth_check():
-    if CLIENT_ID == '...' or CLIENT_SECRET == '...' or course_id == 0:
+    if CLIENT_ID == '...' or CLIENT_SECRET == '...':
         print('Wrong client credentials.')
         print('Go to https://stepik.org/oauth2/applications/, get authorisation data and write into auth.py file.')
         print('Client type = confidential, authorization grant type = client credentials.')
