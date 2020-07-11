@@ -7,6 +7,7 @@ from md_utils import html
 
 from pprint import pprint, pformat
 
+
 # token got from stepik.py
 
 # POST and PUT requests for updata and create step with /api/step-sources/{step_id}
@@ -18,6 +19,7 @@ class StepType:
     VIDEO = 8
     SKIP = 0
     FULL = TEXT | QUESTION | PROBLEM | VIDEO
+
 
 class Step:
     """ 1 step in stepik.org """
@@ -40,23 +42,21 @@ class Step:
         self.position = 0   # step position in lesson, from 1
         self.text = ''
         self.step_type = StepType.TEXT
-        
+
     def __repr__(self):
         return repr(self.dict())
-        
+
     def __str__(self):
-        #return pformat(self.dict())
+        # return pformat(self.dict())
         return str(self.dict())
-    
-     
+
     def html(self):
         """ Call if convert step into HTML file"""
         return self.text
-        
-        
+
     def dict(self):
         """ convert Step() to dictionary for PUT or POST request"""
-        d = dict(self.__class__.DATA_TEMPLATE)      # to get template for child classes if needed
+        d = dict(self.__class__.DATA_TEMPLATE)  # to get template for child classes if needed
         src = d['stepSource']
         src['lesson'] = self.lesson_id
         src['position'] = self.position
@@ -67,14 +67,13 @@ class Step:
     def from_json(self, src):
         """ Set attributes from GET json"""
         print('=======================')
-        #pprint(src)
+        # pprint(src)
         self.id = src['id']
         self.lesson_id = src['lesson']
         self.position = src['position']
         self.text = src['block']['text']
         print('-----------------------')
         print(self)
-        
 
     @staticmethod
     def from_lines(lines):
@@ -92,21 +91,20 @@ class Step:
 
         if stype == 'QUIZ':
             st = StepMultipleChoice.from_aiken(lines[1:])
-        else:                                       # Text
+        else:  # Text
             st = Step()
             st.text = html(lines)
         return st
-
 
     @staticmethod
     def get(step_id):
         """create Step using GET request /api/step-sources/{step_id} """
         json = api.fetch_object('step-source', step_id)
-        
+
         step = Step()
         step.from_json(json)
         return step
-        
+
     def create(self):
         """create step with data using POST request to /api/step-sources"""
         print(json.dumps(self.dict(), indent=4))
@@ -118,12 +116,10 @@ class Step:
         """return list of step_id for lesson_id by GET request to """
         return [step for lesson in api.fetch_objects('lesson', [lesson_id]) for step in lesson['steps']]
 
-
     def update(self, text=None):
         """ update text in the step"""
         self.text = text or self.text
         api.update_object('step-sources', self.id, self.dict())
-
 
     @staticmethod
     def delete_by_id(step_id):
@@ -153,7 +149,7 @@ class StepMultipleChoice(Step):
                     'sample_size': 0,  # len of 'options' list
                     'is_multiple_choice': False,
                     'preserve_order': False,
-                    'is_options_feedback': False    # https://github.com/StepicOrg/Stepik-API/issues/67
+                    'is_options_feedback': False  # https://github.com/StepicOrg/Stepik-API/issues/67
                 }
             },
             'lesson': None,
@@ -183,8 +179,7 @@ class StepMultipleChoice(Step):
         d['stepSource']['block']['source']['options'] = self.options
         d['stepSource']['block']['source']['sample_size'] = len(self.options)
         return d
-        
-        
+
     def html(self, position=None):
         if position is None:
             position = ''
@@ -197,15 +192,14 @@ class StepMultipleChoice(Step):
 CORRECT = {corrects}
 '''
         question = self.text
-        answers = '\n'.join([letter+')\n'+o['text'] for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options )])
-        corrects = ' '.join([letter  for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options ) if o['is_correct']])
+        answers = '\n'.join([letter + ')\n' + o['text'] for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options)])
+        corrects = ' '.join([letter for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options) if o['is_correct']])
         return HTML.format(position, question=question, answers=answers, corrects=corrects)
-        
-
 
     @staticmethod
     def from_aiken(md_lines):
         st = StepMultipleChoice()
+
         class Status(Enum):
             QUESTION = 0
             VARIANT = 1
@@ -221,7 +215,7 @@ CORRECT = {corrects}
             if m:
                 letter = m.group(2)
                 sep = m.group(3)
-                txt = m.group(4)+'\n'
+                txt = m.group(4) + '\n'
 
                 if status == Status.QUESTION:
                     # first answer begin, question end
@@ -245,6 +239,37 @@ CORRECT = {corrects}
                 else:
                     # continue a question or answer
                     md_part.append(line)
+
+
+class StepNumber(Step):
+    DATA_TEMPLATE = {
+        'stepSource': {
+            'block': {
+                'name': 'number',
+                'text': 'What is 2 + 2 ?\n',
+                'source': {
+                    'options': [],
+                    'sample_size': 0,
+                    'is_options_feedback': False
+                }
+            },
+            'lesson': None,
+            'position': None
+        }
+    }
+
+    OPTION_TEMPLATE = {'answer': '4', 'max_error': '0'}
+
+    def __init__(self):
+        super().__init__()
+        self.options = []
+        self.name = 'number'
+        self.step_type = StepType.PROBLEM
+
+
+
+
+
 
 
 '''
@@ -363,4 +388,3 @@ get_step_dict = {
   ]
 }
 '''
-        

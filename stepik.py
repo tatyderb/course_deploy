@@ -9,12 +9,13 @@ import requests
 import sys
 import traceback
 
+
 # 2. Get a token
 def get_token(client_id=CLIENT_ID, client_secret=CLIENT_SECRET):
     auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
     response = requests.post('{}/oauth2/token/'.format(API_HOST), data={'grant_type': 'client_credentials'}, auth=auth)
     # status code should be 200 (HTTP OK)
-    assert(response.status_code == 200)
+    assert (response.status_code == 200)
     token = json.loads(response.text)['access_token']
     print('TOKEN =', token)
     return token
@@ -32,7 +33,7 @@ def update_object(object_name, object_id, data, token=token):
     response = requests.put(api_url, headers={'Authorization': 'Bearer ' + token}, json=data)
     # status code should be 200 (HTTP OK)
     try:
-        assert(response.status_code == 200)
+        assert (response.status_code == 200)
     except AssertionError as e:
         traceback.print_exc()
         print(response.status_code)
@@ -79,7 +80,7 @@ def create_object(object_name, data, token=token):
     # use POST to create new objects
     response = requests.post(api_url, headers={'Authorization': 'Bearer ' + token}, json=data)
     # status code should be 201 (HTTP Created)
-    assert(response.status_code == 201)
+    assert (response.status_code == 201)
     object_id = response.json()[object_name][0]['id']
     return object_id
 
@@ -93,7 +94,7 @@ def delete_object(object_name, object_id, token=token):
     response = requests.delete(api_url, headers={'Authorization': 'Bearer ' + token})
     # status code should be 204 (HTTP Created)
     # print(response.status_code)
-    assert(response.status_code == 204)
+    assert (response.status_code == 204)
 
 
 def test_create():
@@ -125,6 +126,39 @@ def test_create():
     r = requests.post(api_url, headers={'Authorization': 'Bearer ' + token}, json=data)
     step_id = r.json()['step-sources'][0]['id']
     print('Step ID:', step_id)
+
+
+"""
+def test_create():
+    lesson_id = 376447
+    api_url = 'https://stepik.org/api/step-sources'
+
+    data = {
+        'stepSource': {
+            'block': {
+                'name': 'string',
+                'source': {
+                    'pattern': 'степик',
+                    'code': '',
+
+                    'match_substring': False,
+                    'case_sensitive': False,
+                    'use_re': False,
+
+                    'is_file_disabled': True,
+                    'is_text_disabled': False
+                },
+                'text': '<p>Напишите "степик"</p>\n',
+                'is_options_feedback': False,
+            },
+            'lesson': lesson_id,
+            'position': 3
+        }
+    }
+    r = requests.post(api_url, headers={'Authorization': 'Bearer ' + token}, json=data)
+    step_id = r.json()['step-sources'][0]['id']
+    print('Step ID:', step_id)
+"""
 
 if __name__ == '__main__':
     test_create()
