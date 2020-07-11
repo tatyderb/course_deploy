@@ -225,6 +225,8 @@ def main():
     else:
         print('deploy all by default')
         deployed_step_types = StepType.FULL
+
+
     
     with open(args.markdown_filename, encoding='utf-8') as fin:
         # First step - all other steps as one page if mode = DEBUG
