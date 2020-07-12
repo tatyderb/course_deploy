@@ -2,7 +2,8 @@
 Utils for markdown -> html conversion.
 """
 
-import markdown # https://python-markdown.github.io
+import markdown  # https://python-markdown.github.io
+
 
 def html(text_md):
     if not isinstance(text_md, str):               # list of strings
