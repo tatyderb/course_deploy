@@ -182,6 +182,7 @@ class StepMultipleChoice(Step):
         d = super().dict()
         d['stepSource']['block']['source']['options'] = self.options
         d['stepSource']['block']['source']['sample_size'] = len(self.options)
+        d['stepSource']['block']['source']['is_multiple_choice'] = self.is_multiple_choice
         return d
         
         
@@ -233,14 +234,17 @@ CORRECT = {corrects}
                 md_part = [txt]
                 letter_seq.append(letter)
             else:
-                m_answer = re.match(r'\s*ANSWER[:]*\s*([A-Z])\s*', line)
+                m_answer = re.match(r'\s*ANSWER[:]*\s*([A-Z, ]+)\s*', line)
                 if m_answer and status == Status.VARIANT:
                     # end of question
                     st.add_option(md_part)
-
-                    letter = m_answer.group(1)
-                    ind = letter_seq.index(letter)
-                    st.options[ind]['is_correct'] = True
+                    print(f'group1 = {m_answer.group(1)}')
+                    letters = [s.strip() for s in m_answer.group(1).split(',')]
+                    print(f'letters={letters}')
+                    st.is_multiple_choice = len(letters) > 1
+                    for letter in letters:
+                        ind = letter_seq.index(letter)
+                        st.options[ind]['is_correct'] = True
                     return st
                 else:
                     # continue a question or answer
