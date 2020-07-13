@@ -14,6 +14,7 @@ logger = logging.getLogger('deploy_scripts')
 
 # POST and PUT requests for updata and create step with /api/step-sources/{step_id}
 
+
 class StepType:
     TEXT = 1
     QUESTION = 2
@@ -21,6 +22,7 @@ class StepType:
     VIDEO = 8
     SKIP = 0
     FULL = TEXT | QUESTION | PROBLEM | VIDEO
+
 
 class Step:
     """ 1 step in stepik.org """
@@ -48,15 +50,13 @@ class Step:
         return repr(self.dict())
         
     def __str__(self):
-        #return pformat(self.dict())
+        # return pformat(self.dict())
         return json.dumps(self.dict(), indent=4)
-    
-     
+
     def html(self):
         """ Call if convert step into HTML file"""
         return self.text
-        
-        
+
     def dict(self):
         """ convert Step() to dictionary for PUT or POST request"""
         d = dict(self.__class__.DATA_TEMPLATE)      # to get template for child classes if needed
@@ -70,14 +70,13 @@ class Step:
     def from_json(self, src):
         """ Set attributes from GET json"""
         logger.debug('=======================')
-        #pprint(src)
+        # pprint(src)
         self.id = src['id']
         self.lesson_id = src['lesson']
         self.position = src['position']
         self.text = src['block']['text']
         logger.debug('-----------------------')
         logger.debug(self)
-        
 
     @staticmethod
     def from_lines(lines):
@@ -95,11 +94,12 @@ class Step:
 
         if stype == 'QUIZ':
             st = StepMultipleChoice.from_aiken(lines[1:])
+        elif stype == 'NUMBER':  # todo: довести до конца
+            st = StepNumber.num_from_md(lines[1:])
         else:                                       # Text
             st = Step()
             st.text = html(lines)
         return st
-
 
     @staticmethod
     def get(step_id):
@@ -121,12 +121,10 @@ class Step:
         """return list of step_id for lesson_id by GET request to """
         return [step for lesson in api.fetch_objects('lesson', [lesson_id]) for step in lesson['steps']]
 
-
     def update(self, text=None):
         """ update text in the step"""
         self.text = text or self.text
         api.update_object('step-sources', self.id, self.dict())
-
 
     @staticmethod
     def delete_by_id(step_id):
@@ -189,8 +187,7 @@ class StepMultipleChoice(Step):
         d['stepSource']['block']['source']['is_multiple_choice'] = self.is_multiple_choice
         d['stepSource']['block']['source']['preserve_order'] = self.preserve_order
         return d
-        
-        
+
     def html(self, position=None):
         if position is None:
             position = ''
@@ -203,15 +200,14 @@ class StepMultipleChoice(Step):
 CORRECT = {corrects}
 '''
         question = self.text
-        answers = '\n'.join([letter+')\n'+o['text'] for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options )])
-        corrects = ' '.join([letter  for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options ) if o['is_correct']])
+        answers = '\n'.join([letter+')\n'+o['text'] for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options)])
+        corrects = ' '.join([letter for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options) if o['is_correct']])
         return HTML.format(position, question=question, answers=answers, corrects=corrects)
-        
-
 
     @staticmethod
     def from_aiken(md_lines):
         st = StepMultipleChoice()
+
         class Status(Enum):
             QUESTION = 0
             VARIANT = 1
@@ -264,6 +260,97 @@ CORRECT = {corrects}
                 else:
                     # continue a question or answer
                     md_part.append(line)
+
+
+class StepNumber(Step):
+    DATA_TEMPLATE = {
+        'stepSource': {
+            'block': {
+                'name': 'number',
+                'text': 'Enter the answer',  # task text in html
+                'source': {
+                    'options': [],  # add answer variants here, use option_template
+                    'sample_size': 0,  # len of 'options' list
+                    'is_options_feedback': False
+                }
+            },
+            'lesson': None,
+            'position': None
+        }
+    }
+
+    OPTION_TEMPLATE = {'answer': '4', 'max_error': '0'}
+
+    def __init__(self):
+        super().__init__()
+        self.options = []
+        self.name = 'number'
+        self.step_type = StepType.PROBLEM  # todo: понять надо ли добавлять тип в StepType для вставки
+        # todo: вставки слов или можно обойтись тем, что есть
+
+    def add_answer(self, exp, var):
+        op = dict(StepNumber.OPTION_TEMPLATE)
+        op['answer'] = str(exp)
+        op['max_error'] = str(var)
+        self.options.append(op)
+
+    def dict(self):
+        d = super().dict()
+        d['stepSource']['block']['source']['options'] = self.options
+        d['stepSource']['block']['source']['sample_size'] = len(self.options)
+        return d
+
+    def html(self, position=None):
+        if position is None:  # todo: разобраться - написать
+            position = ''
+        else:
+            position = str(position)
+        HTML = '''
+<h2>PROBLEM {}</h2>
+{question}
+Answers = {answers} 
+'''
+        question = self.text
+        # answers = ???
+        # todo: разобраться
+
+        return HTML.format(position, question=question, answers=answers)
+
+    @staticmethod
+    def num_from_md(md_lines):
+        st = StepNumber()
+
+        class Status(Enum):
+            QUESTION = 0
+            ANSWER = 1
+
+        md_part = []
+        status = Status.QUESTION
+
+        for line in md_lines:
+            m = re.match(r"\s*ANSWER[:]*\s*(\d+)\s*\+?-?\s*(\d*)\s*", line)
+            if m:
+                exp = int(m.group(1))
+                var = int(m.group(2)) if m.group(2) != '' else 0
+
+                if status == Status.QUESTION:
+                    # first answer begin, question end
+                    status = Status.ANSWER
+                    st.text = html(md_part)
+                    st.add_answer(exp, var)
+                elif status == Status.ANSWER:
+                    # next variant, commit previous variant
+                    st.add_answer(exp, var)
+            else:
+                m_answer = re.match(r'\s*END\s*', line)
+                if m_answer and status == Status.ANSWER:
+                    # end of question
+                    return st
+                else:
+                    # continue a question or answer
+                    md_part.append(line)
+
+        return st
 
 
 '''
@@ -382,4 +469,3 @@ get_step_dict = {
   ]
 }
 '''
-        
