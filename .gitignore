@@ -3,3 +3,5 @@ __pycache__
 auth_data.py
 examples/html
 examples/lesson_try.md
+*.log
+**/*.log
