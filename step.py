@@ -7,6 +7,9 @@ from md_utils import html
 
 from pprint import pprint, pformat
 
+import logging
+logger = logging.getLogger('deploy_scripts')
+
 # token got from stepik.py
 
 # POST and PUT requests for updata and create step with /api/step-sources/{step_id}
@@ -46,7 +49,7 @@ class Step:
         
     def __str__(self):
         #return pformat(self.dict())
-        return str(self.dict())
+        return json.dumps(self.dict(), indent=4)
     
      
     def html(self):
@@ -66,14 +69,14 @@ class Step:
 
     def from_json(self, src):
         """ Set attributes from GET json"""
-        print('=======================')
+        logger.debug('=======================')
         #pprint(src)
         self.id = src['id']
         self.lesson_id = src['lesson']
         self.position = src['position']
         self.text = src['block']['text']
-        print('-----------------------')
-        print(self)
+        logger.debug('-----------------------')
+        logger.debug(self)
         
 
     @staticmethod
@@ -86,8 +89,8 @@ class Step:
         # ## text | ## long text | ## QUIZ text
         h2, stype, *a = lines[0].split()
         if h2 != '##':
-            print('Expected step header format "## [QUIZ] text"')
-            print(f"now: {lines[0]}")
+            logger.error('Expected step header format "## [QUIZ] text"')
+            logger.error(f"now: {lines[0]}")
             return None
 
         if stype == 'QUIZ':
@@ -109,7 +112,7 @@ class Step:
         
     def create(self):
         """create step with data using POST request to /api/step-sources"""
-        print(json.dumps(self.dict(), indent=4))
+        logger.debug(json.dumps(self.dict(), indent=4))
         self.id = api.create_object('step-sources', self.dict())
         return self.id
 
@@ -226,7 +229,7 @@ CORRECT = {corrects}
                 elif m.group(1).lower() == 'false':
                     st.preserve_order = True
                 else:
-                    print(f'Unknown value SHUFFLE: [{m.group(1)}]')
+                    logger.warning(f'Unknown value SHUFFLE: [{m.group(1)}]')
                 continue
 
             # variant begin by A) or A.
@@ -250,9 +253,9 @@ CORRECT = {corrects}
                 if m_answer and status == Status.VARIANT:
                     # end of question
                     st.add_option(md_part)
-                    print(f'group1 = {m_answer.group(1)}')
+                    logger.debug(f'group1 = {m_answer.group(1)}')
                     letters = [s.strip() for s in m_answer.group(1).split(',')]
-                    print(f'letters={letters}')
+                    logger.debug(f'letters={letters}')
                     st.is_multiple_choice = len(letters) > 1
                     for letter in letters:
                         ind = letter_seq.index(letter)
