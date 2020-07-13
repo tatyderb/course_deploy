@@ -30,6 +30,7 @@ TYPE может быть следующим:
 * TEXT или отсутствует - это обычный шаг с методическими материалами;
 * PROBLEM - указание на вставку задачи, на следующей строке - название директории с задачей в формате `problem = sum_1`
 * QUIZ - вопрос в формате [AIKEN](https://docs.moodle.org/37/en/Aiken_format);
+  * По умолчанию предлагаемые ответы перемешиваются. Чтобы зафиксировать порядок ответов напишите на строке `SHUFFLE: False` (или `True`, без учета регистра) до строки с `ANSWER`.
   * Если нужно задать много правильных ответов, то перечисляем их в любом порядке через запятую `ANSWER: A, D, C`
 * VIDEO - далее идет урл на видео в формате `video=https://d3c33hcgiwev3.cloudfront.net/KYDrAeHNEeiAgQrXx6bp4g.processed/full/360p/index.mp4?Expires=1563753600&Signature=V1YOioA-2y8C52Sf-tHLBnBxfAfu3lP2gUV4eajalMH-lA-uJC1xWPfbfBFOy90BHfoSqxk7raYONL0FlrF18NDaTxLkrKZ~~GB4QD5YxNCEPqug2HQQf4itZkf0M4GkwgPWZX9~QXkJjgX9x0LyhflLCgfCxCrZhY8AnpwgPes_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A`
 

@@ -165,6 +165,7 @@ class StepMultipleChoice(Step):
     def __init__(self):
         super().__init__()
         self.is_multiple_choice = False
+        self.preserve_order = False
         self.options = []
         self.name = 'choice'
         self.step_type = StepType.QUESTION
@@ -183,6 +184,7 @@ class StepMultipleChoice(Step):
         d['stepSource']['block']['source']['options'] = self.options
         d['stepSource']['block']['source']['sample_size'] = len(self.options)
         d['stepSource']['block']['source']['is_multiple_choice'] = self.is_multiple_choice
+        d['stepSource']['block']['source']['preserve_order'] = self.preserve_order
         return d
         
         
@@ -216,6 +218,16 @@ CORRECT = {corrects}
         md_part = []
         status = Status.QUESTION
         for line in md_lines:
+            # Is it SHUFFLE option?
+            m = re.match(r'SHUFFLE:\s*(\w+).*', line)
+            if m:
+                if m.group(1).lower() == 'true':
+                    st.preserve_order = False
+                elif m.group(1).lower() == 'false':
+                    st.preserve_order = True
+                else:
+                    print(f'Unknown value SHUFFLE: [{m.group(1)}]')
+                continue
 
             # variant begin by A) or A.
             m = re.match(r'(\s*)([A-Z])([.)])(.*)', line)
