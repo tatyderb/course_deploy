@@ -9,6 +9,7 @@ import requests
 import sys
 import traceback
 
+
 # 2. Get a token
 def get_token(client_id=CLIENT_ID, client_secret=CLIENT_SECRET):
     auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
@@ -125,6 +126,7 @@ def test_create():
     r = requests.post(api_url, headers={'Authorization': 'Bearer ' + token}, json=data)
     step_id = r.json()['step-sources'][0]['id']
     print('Step ID:', step_id)
+
 
 if __name__ == '__main__':
     test_create()
