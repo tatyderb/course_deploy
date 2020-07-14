@@ -312,7 +312,7 @@ class StepNumber(Step):
 '''
         question = self.text
         answers = '\n'.join(
-            [str(point) + ') ' + str(o) for point, o in zip(range(1, 100), self.options)])
+            [ f'{num+1}) {opt}' for num, opt in enumerate(self.options)])
 
         return HTML.format(position, question=question, answers=answers)
 
