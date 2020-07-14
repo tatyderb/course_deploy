@@ -26,6 +26,7 @@ import sys
 
 logger = None
 
+
 def is_empty_line(line):
     return not line.strip()
 
@@ -198,6 +199,7 @@ def print_to_html_file(md_filename, steps, allow_step_types=StepType.FULL):
             else:
                 print(f'SKIP HTML step={st.id} position={st.position}')
 
+
 def setup_logger(loglevel):
     """
     Use own logger for logging into out.log file and console(?)
@@ -219,7 +221,8 @@ def setup_logger(loglevel):
     ch.setLevel(loglevel)
 
     # create formatter and add it to the handlers
-    #formatter = logging.Formatter('%(asctime)s - %(filename)s:%(lineno)d - %(funcName)s - %(levelname)s - %(message)s')
+    # formatter =
+    # logging.Formatter('%(asctime)s - %(filename)s:%(lineno)d - %(funcName)s - %(levelname)s - %(message)s')
     formatter = logging.Formatter(u'%(filename)s:%(lineno)d - %(funcName)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
     ch.setFormatter(formatter)
@@ -228,18 +231,26 @@ def setup_logger(loglevel):
     logger.addHandler(fh)
     logger.addHandler(ch)
 
+
 def main():
     """Read input file, split into steps, upload to site"""
     import argparse
 
     parser = argparse.ArgumentParser(description='Deploy markdown file into site or convert to html for manual deploying')
     parser.add_argument('markdown_filename', metavar='FILE', type=str, help='input markdown file')
+
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-f", "--full", action="store_true", help='deploy all steps')
-    group.add_argument("-t", "--text", action="store_true", help='deploy only text steps')
-    parser.add_argument('-d', '--debug', action='store_true', help='deploy all steps in the first one to debug formatting')
+    group.add_argument('-f', '--full', action="store_true", help='deploy all steps')
+    group.add_argument('-t', '--text', action="store_true", help='deploy only text steps')
+
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='deploy all steps in the first one to debug formatting')
     parser.add_argument('--html', action='store_true', help='deploy all steps into 1 HTML file, not to site')
-    parser.add_argument('--step', type=int, default=0, help='update only the step N, start N from 1, negative numbers are allowed too')
+
+    parser.add_argument('-s', '--step', type=int, default=0,
+                        help='update only the step N, start N from 1, negative numbers are allowed too')
+    # parser.add_argument('-c', '--conf', type=str, default='...', help='deploy with config file')
+
     args = parser.parse_args()
 
     if args.debug:
@@ -247,7 +258,6 @@ def main():
     else:
         loglevel = logging.INFO
     setup_logger(loglevel)
-
 
     logger.info(f'FILE = {args.markdown_filename}')
     if args.html:

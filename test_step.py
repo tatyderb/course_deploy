@@ -2,7 +2,7 @@
 Test function to update stepik steps.
 """
 from stepik import fetch_objects, fetch_object
-from step import Step #, put_step_dict
+from step import Step  # put_step_dict
 
 import re
 
@@ -12,6 +12,7 @@ expected_lesson_ids = [239930, 239927, 239366, 239929]
 expected_step_ids = [761415, 770595, 781288]                            # for lesson = 239930
 
 expected_step_text='<p>Lesson 239930, step 761415. Don\'t change it!</p>'
+
 
 def test_get_lesson_ids(course_id=course_id, expected=expected_lesson_ids):
     print('----- test_get_lesson_ids')
@@ -26,7 +27,8 @@ def test_get_lesson_ids(course_id=course_id, expected=expected_lesson_ids):
     
     assert(lesson_ids == expected)
     return lesson_ids
-    
+
+
 def test_get_step_ids(lesson_id=expected_lesson_ids[0], expected=expected_step_ids):
     print('----- test_get_step_ids')
     step_ids = Step.get_step_ids_for_lesson(lesson_id)
@@ -34,7 +36,8 @@ def test_get_step_ids(lesson_id=expected_lesson_ids[0], expected=expected_step_i
     
     assert(step_ids == expected)
     return step_ids
-    
+
+
 def test_get_step(step_ids, ind=0, expected=expected_step_text):
     print('----- test_get_step')
     step_id = step_ids[ind]
@@ -43,7 +46,8 @@ def test_get_step(step_ids, ind=0, expected=expected_step_text):
     
     assert(st.text == expected)
     return st, ind + 1
-    
+
+
 def text_next_counter(text):
     m = re.search(r'\d+', text)
     # if m:
@@ -57,7 +61,8 @@ def text_next_counter(text):
     # print('From: ', text)
     # print('To   :', new_text)
     return new_text
-    
+
+
 def test_step_update(step_ids, ind=0):
     """ get text, increase counter++, put text with new counter"""
     print('----- test_step_update: TEXT')
@@ -72,10 +77,7 @@ def test_step_update(step_ids, ind=0):
     print('----- test_step_update: QUIZ')
     print('Not implemented yet')
     return st, ind + 1
-    
-    
-    
-   
+
 
 '''
 less_id = 239930
