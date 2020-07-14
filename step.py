@@ -55,7 +55,7 @@ class Step:
 
     def html(self):
         """ Call if convert step into HTML file"""
-        return self.text
+        return self.text  # todo: Не работает - исправить
 
     def dict(self):
         """ convert Step() to dictionary for PUT or POST request"""
@@ -308,11 +308,11 @@ class StepNumber(Step):
         HTML = '''
 <h2>PROBLEM {}</h2>
 {question}
-Answers = {answers} 
+{answers} 
 '''
         question = self.text
-        # answers = ???
-        # todo: разобраться
+        answers = '\n'.join(
+            [str(point) + ') ' + str(o) for point, o in zip(range(1, 100), self.options)])
 
         return HTML.format(position, question=question, answers=answers)
 
