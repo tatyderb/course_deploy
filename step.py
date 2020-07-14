@@ -53,9 +53,20 @@ class Step:
         # return pformat(self.dict())
         return json.dumps(self.dict(), indent=4)
 
-    def html(self):
-        """ Call if convert step into HTML file"""
-        return self.text  # todo: Не работает - исправить
+    def html(self, position=None):
+        """ Call if convert steps into HTML file"""
+        if position is None:
+            position = ''
+        else:
+            position = str(position)
+
+        HTML = '''
+<h2>TEXT {}</h2>
+{text}
+'''
+        text = ''.join(self.text)
+
+        return HTML.format(position, text=text)
 
     def dict(self):
         """ convert Step() to dictionary for PUT or POST request"""
