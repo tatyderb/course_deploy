@@ -12,7 +12,7 @@ markdown text
 question in AIKEN format
 """
 import md_utils
-from step import Step, StepType
+from st_types.step import Step, StepType, from_lines
 
 from enum import Enum
 import json
@@ -37,7 +37,9 @@ def error(message="Error"):
 
 def commit_step(steps, lesson_id, lines):
     """Create Step from lines and append to steps list"""
-    st = Step.from_lines(lines)
+    # st = Step.from_lines(lines)
+    st = from_lines(lines)
+
     st.lesson_id = lesson_id
     st.position = len(steps) + 1
     logger.debug(st)
