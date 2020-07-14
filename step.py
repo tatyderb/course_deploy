@@ -105,7 +105,7 @@ class Step:
 
         if stype == 'QUIZ':
             st = StepMultipleChoice.from_aiken(lines[1:])
-        elif stype == 'NUMBER':  # todo: довести до конца
+        elif stype == 'NUMBER':
             st = StepNumber.num_from_md(lines[1:])
         else:                                       # Text
             st = Step()
@@ -298,8 +298,7 @@ class StepNumber(Step):
         super().__init__()
         self.options = []
         self.name = 'number'
-        self.step_type = StepType.PROBLEM  # todo: понять надо ли добавлять тип в StepType для вставки
-        # todo: вставки слов или можно обойтись тем, что есть
+        self.step_type = StepType.PROBLEM
 
     def add_answer(self, exp, var):
         op = dict(StepNumber.OPTION_TEMPLATE)
@@ -314,7 +313,7 @@ class StepNumber(Step):
         return d
 
     def html(self, position=None):
-        if position is None:  # todo: разобраться - написать
+        if position is None:
             position = ''
         else:
             position = str(position)
