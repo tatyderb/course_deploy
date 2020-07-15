@@ -40,7 +40,7 @@ class Step:
     def __init__(self):
         """ Dummy step """
         self.id = 0         # step_id, use in update and delete, filled by create method
-        self.name = 'text'  # todo: various types (text, question, video, task
+        self.name = 'text'  # todo: various types (text, question, video, task)
         self.lesson_id = 0  # todo: lesson_id, should be filled, need for create and update requests
         self.position = 0   # step position in lesson, from 1
         self.text = ''
@@ -53,9 +53,20 @@ class Step:
         # return pformat(self.dict())
         return json.dumps(self.dict(), indent=4)
 
-    def html(self):
-        """ Call if convert step into HTML file"""
-        return self.text  # todo: Не работает - исправить
+    def html(self, position=None):
+        """ Call if convert steps into HTML file"""
+        if position is None:
+            position = ''
+        else:
+            position = str(position)
+
+        HTML = '''
+<h2>TEXT {}</h2>
+{text}
+'''
+        text = ''.join(self.text)
+
+        return HTML.format(position, text=text)
 
     def dict(self):
         """ convert Step() to dictionary for PUT or POST request"""
@@ -94,7 +105,7 @@ class Step:
 
         if stype == 'QUIZ':
             st = StepMultipleChoice.from_aiken(lines[1:])
-        elif stype == 'NUMBER':  # todo: довести до конца
+        elif stype == 'NUMBER':
             st = StepNumber.num_from_md(lines[1:])
         else:                                       # Text
             st = Step()
@@ -104,10 +115,10 @@ class Step:
     @staticmethod
     def get(step_id):
         """create Step using GET request /api/step-sources/{step_id} """
-        json = api.fetch_object('step-source', step_id)
+        json_st = api.fetch_object('step-source', step_id)
         
         step = Step()
-        step.from_json(json)
+        step.from_json(json_st)
         return step
         
     def create(self):
@@ -200,8 +211,10 @@ class StepMultipleChoice(Step):
 CORRECT = {corrects}
 '''
         question = self.text
-        answers = '\n'.join([letter+')\n'+o['text'] for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options)])
-        corrects = ' '.join([letter for letter, o in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options) if o['is_correct']])
+        answers = '\n'.join([letter+')\n'+o['text'] for letter, o
+                             in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options)])
+        corrects = ' '.join([letter for letter, o
+                             in zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', self.options) if o['is_correct']])
         return HTML.format(position, question=question, answers=answers, corrects=corrects)
 
     @staticmethod
@@ -232,7 +245,7 @@ CORRECT = {corrects}
             m = re.match(r'(\s*)([A-Z])([.)])(.*)', line)
             if m:
                 letter = m.group(2)
-                sep = m.group(3)
+                # sep = m.group(3)
                 txt = m.group(4)+'\n'
 
                 if status == Status.QUESTION:
@@ -285,8 +298,7 @@ class StepNumber(Step):
         super().__init__()
         self.options = []
         self.name = 'number'
-        self.step_type = StepType.PROBLEM  # todo: понять надо ли добавлять тип в StepType для вставки
-        # todo: вставки слов или можно обойтись тем, что есть
+        self.step_type = StepType.PROBLEM
 
     def add_answer(self, exp, var):
         op = dict(StepNumber.OPTION_TEMPLATE)
@@ -301,7 +313,7 @@ class StepNumber(Step):
         return d
 
     def html(self, position=None):
-        if position is None:  # todo: разобраться - написать
+        if position is None:
             position = ''
         else:
             position = str(position)
@@ -312,7 +324,7 @@ class StepNumber(Step):
 '''
         question = self.text
         answers = '\n'.join(
-            [ f'{num+1}) {opt}' for num, opt in enumerate(self.options)])
+            [f'{num+1}) {opt}' for num, opt in enumerate(self.options)])
 
         return HTML.format(position, question=question, answers=answers)
 
@@ -355,49 +367,49 @@ class StepNumber(Step):
 
 '''
 put_step_dict = {
-	"stepSource": {
-		"lesson_id": 239930,                        # set lesson_id - нет в get
-		"lesson": 239930,                           # set lesson_id
-		"position": 1,                              # set step position in lesson, start with 1.
-		"status": "ready",
-
-		"block": {
-			"name": "text",
-			"text": "<p>Text of step</p>",          # set new text as html
-			"video": None,
-			"animation": None,
-			"options": {},
-			"subtitle_files": [],
-			"source": {},
-			"subtitles": {},
-			"tests_archive": None,
-			"feedback_correct": "",
-			"feedback_wrong": ""
-		},
-
-		"actions": {},
-
-		"instruction": None,
-		"instruction_type": None,
-		"instruction_id": None,                     # нет в get
-		"has_instruction": False,                   # нет в get
-
-		"is_solutions_unlocked": False,
-		"solutions_unlocked_attempts": 3,
-		"max_submissions_count": 3,
-		"has_submissions_restrictions": False,
-
-		"create_date": "2019-06-26T05:01:47Z",      # set create date
-
-		"reason_of_failure": "",
-		"error": {
-			"text": "",
-			"code": "",
-			"params": {}
-		},
-		"warnings": [],
-		"cost": 0,
-	}
+    "stepSource": {
+        "lesson_id": 239930,                        # set lesson_id - нет в get
+        "lesson": 239930,                           # set lesson_id
+        "position": 1,                              # set step position in lesson, start with 1.
+        "status": "ready",
+    
+        "block": {
+            "name": "text",
+            "text": "<p>Text of step</p>",          # set new text as html
+            "video": None,
+            "animation": None,
+            "options": {},
+            "subtitle_files": [],
+            "source": {},
+            "subtitles": {},
+            "tests_archive": None,
+            "feedback_correct": "",
+            "feedback_wrong": ""
+        },
+    
+        "actions": {},
+    
+        "instruction": None,
+        "instruction_type": None,
+        "instruction_id": None,                     # нет в get
+        "has_instruction": False,                   # нет в get
+    
+        "is_solutions_unlocked": False,
+        "solutions_unlocked_attempts": 3,
+        "max_submissions_count": 3,
+        "has_submissions_restrictions": False,
+    
+        "create_date": "2019-06-26T05:01:47Z",      # set create date
+    
+        "reason_of_failure": "",
+        "error": {
+            "text": "",
+            "code": "",
+            "params": {}
+        },
+        "warnings": [],
+        "cost": 0,
+    }
 }
 '''
 
