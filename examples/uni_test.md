@@ -24,4 +24,4 @@ A) Нет
 B) Да
 C) Надо смириться
 
-ANSWER: A, B, C
+ANSWER: C
