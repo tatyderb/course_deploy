@@ -16,8 +16,10 @@ class StepType:
     QUESTION = 2
     PROBLEM = 4
     VIDEO = 8
+    NUMBER = 16
+    STRING = 32
     SKIP = 0
-    FULL = TEXT | QUESTION | PROBLEM | VIDEO
+    FULL = TEXT | QUESTION | PROBLEM | VIDEO | NUMBER | STRING
 
 
 class Step:
