@@ -78,10 +78,10 @@ class StepNumber(Step):
         status = Status.QUESTION
 
         for line in md_lines:
-            m = re.match(r"\s*ANSWER[:]*\s*(\d+)\s*(\+-)?\s*(\d*)\s*", line)
+            m = re.match(r"\s*ANSWER[:]*\s*(\d+\.?\d*)\s*(\+-)?\s*(\d*\.?\d*)\s*", line)
             if m:
-                exp = int(m.group(1))
-                var = int(m.group(3)) if m.group(3) != '' else 0
+                exp = float(m.group(1))
+                var = float(m.group(3)) if m.group(3) != '' else 0
 
                 if status == Status.QUESTION:
                     # first answer begin, question end
