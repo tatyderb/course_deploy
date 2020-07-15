@@ -3,6 +3,7 @@
 API for add, update or delete Stepik objects: steps.
 """
 from auth_data import API_HOST, CLIENT_ID, CLIENT_SECRET
+import pprint
 
 import json
 import requests
@@ -37,8 +38,8 @@ def update_object(object_name, object_id, data, token=token):
     except AssertionError as e:
         traceback.print_exc()
         print(response.status_code)
-        print(response.content)
-        print(json.dumps(json.loads(response.content), indent=4))
+        pprint.pprint(response.content)
+        pprint.pprint(json.dumps(json.loads(response.content), indent=4))
         sys.exit(1)
     object_id = response.json()[object_name][0]['id']
     return object_id
