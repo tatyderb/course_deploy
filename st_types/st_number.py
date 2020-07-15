@@ -36,7 +36,7 @@ class StepNumber(Step):
         super().__init__()
         self.options = []
         self.name = 'number'
-        self.step_type = StepType.PROBLEM
+        self.step_type = StepType.NUMBER
 
     def add_answer(self, exp, var):
         op = dict(StepNumber.OPTION_TEMPLATE)
@@ -56,7 +56,7 @@ class StepNumber(Step):
         else:
             position = str(position)
         HTML = '''
-<h2>PROBLEM {}</h2>
+<h2>NUMBER {}</h2>
 {question}
 {answers} 
 '''
@@ -78,10 +78,10 @@ class StepNumber(Step):
         status = Status.QUESTION
 
         for line in md_lines:
-            m = re.match(r"\s*ANSWER[:]*\s*(\d+)\s*\+?-?\s*(\d*)\s*", line)
+            m = re.match(r"\s*ANSWER[:]*\s*(\d+)\s*(\+-)?\s*(\d*)\s*", line)
             if m:
                 exp = int(m.group(1))
-                var = int(m.group(2)) if m.group(2) != '' else 0
+                var = int(m.group(3)) if m.group(3) != '' else 0
 
                 if status == Status.QUESTION:
                     # first answer begin, question end

@@ -270,7 +270,7 @@ def main():
         deployed_step_types = StepType.FULL
     elif args.text:
         logger.info('deploy TEXT only')
-        deployed_step_types |= StepType.TEXT
+        deployed_step_types = StepType.TEXT
     else:
         logger.info('deploy all by default')
         deployed_step_types = StepType.FULL
