@@ -82,11 +82,11 @@ class StepNumber(Step):
 
             if line.startswith('ANSWER:') and '+-' in line:
                 ans = ans_template.parseString(line)
-                exp = ans[1]
-                var = ans[3]
+                exp = float(ans[1])
+                var = float(ans[3])
             elif line.startswith('ANSWER:'):
                 ans = ans_template.parseString(line)
-                exp = ans[1]
+                exp = float(ans[1])
                 var = 0
 
             if ans:
