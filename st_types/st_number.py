@@ -1,5 +1,6 @@
 import json
 import re
+import parse
 from enum import Enum
 
 import stepik as api
@@ -69,31 +70,27 @@ class StepNumber(Step):
     @staticmethod
     def num_from_md(md_lines):
         st = StepNumber()
-
-        class Status(Enum):
-            QUESTION = 0
-            ANSWER = 1
-
         md_part = []
-        status = Status.QUESTION
 
         for line in md_lines:
-            m = re.match(r"\s*ANSWER[:]*\s*(\d+\.?\d*)\s*(\+-)?\s*(\d*\.?\d*)\s*", line)
-            if m:
-                exp = float(m.group(1))
-                var = float(m.group(3)) if m.group(3) != '' else 0
+            m_acc = parse.parse('ANSWER: {:g} +- {:g}', line)
+            m_nacc = None
 
-                if status == Status.QUESTION:
-                    # first answer begin, question end
-                    status = Status.ANSWER
-                    st.text = html(md_part)
-                    st.add_answer(exp, var)
-                elif status == Status.ANSWER:
-                    # next variant, commit previous variant
-                    st.add_answer(exp, var)
+            if m_acc:
+                exp = m_acc[0]
+                var = m_acc[1]
             else:
-                m_answer = re.match(r'\s*END\s*', line)
-                if m_answer and status == Status.ANSWER:
+                m_nacc = parse.parse('ANSWER: {:g}', line)
+                if m_nacc:
+                    exp = m_nacc[0]
+                    var = 0
+
+            if m_acc or m_nacc:
+                st.text = html(md_part)
+                st.add_answer(exp, var)
+            else:
+                m_new = parse.parse('##', line)
+                if m_new:
                     # end of question
                     return st
                 else:
