@@ -6,7 +6,7 @@ lesson = 376770
 
 Сколько будет 2 + 2?
 
-ANSWER: 4 +- 0
-ANSWER: 5 +- 0
+ANSWER: 4 +- 0.1
+ANSWER: 5 +- 0.2
 
 END
