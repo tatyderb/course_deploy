@@ -84,12 +84,7 @@ class StepNumber(Step):
                 st.text = html(md_part)
                 st.add_answer(exp, var)
             else:
-                m_new = parse.parse('##', line)
-                if m_new:
-                    # end of question
-                    return st
-                else:
-                    # continue a question or answer
-                    md_part.append(line)
+                # continue a question or answer
+                md_part.append(line)
 
         return st
