@@ -73,14 +73,18 @@ class StepNumber(Step):
         md_part = []
 
         for line in md_lines:
-            m_exp = parse.parse('ANSWER:{:>g}{}', line)
+            p = None
 
-            if m_exp:
-                exp = m_exp[0]
+            if '+-' in line:
+                p = parse.parse('ANSWER:{:^g}+-{:^g}', line)
+                exp = p[0]
+                var = p[1]
+            elif 'ANSWER' in line:
+                p = parse.parse('ANSWER:{:^g}', line)
+                exp = p[0]
+                var = 0
 
-                m_var = parse.search('{}+-{:>g}', m_exp[1])
-                var = m_var[1] if m_var else 0
-
+            if p:
                 st.text = html(md_part)
                 st.add_answer(exp, var)
             else:
