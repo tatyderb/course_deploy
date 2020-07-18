@@ -1,5 +1,6 @@
 import json
 import re
+from pyparsing import Word, printables, OneOrMore
 from enum import Enum
 
 import stepik as api
@@ -59,41 +60,37 @@ class StepString(Step):
         HTML = '''
 <h2>STRING {}</h2>
 {question}
-PATTERN: {pattern} 
+ANSWER: {pattern} 
 '''
         return HTML.format(position, question=self.text, pattern=self.pattern)
 
     @staticmethod
     def str_from_md(md_lines):
         st = StepString()
-
-        class Status(Enum):
-            QUESTION = 0
-            ANSWER = 1
-
         md_part = []
-        status = Status.QUESTION
+
+        kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
+        WRD = Word(printables + kir_letter)
+        WRDs = OneOrMore(WRD)
+        ans_template = 'ANSWER:' + WRDs
 
         for line in md_lines:
-            m = re.match(r"\s*PATTERN[:]\s*(.*)\s*", line)
-            if m:
-                pattern = m.group(1)
+            ans = None
 
-                if status == Status.QUESTION:
-                    # answer begin, question end
-                    status = Status.ANSWER
-                    st.text = html(md_part)
-                    st.pattern = pattern
-                elif status == Status.ANSWER:
-                    st.pattern = pattern
-            elif status == Status.ANSWER:
-                # end of question
+            if line.startswith('ANSWER:'):
+                ans = ans_template.parseString(line)
+                st.pattern = ' '.join(ans[1:])
+
+            if ans:
+                st.text = html(md_part)
                 return st
             else:
                 # continue a question or answer
                 md_part.append(line)
 
         return st
+
+
 
 
 """
