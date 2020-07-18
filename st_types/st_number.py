@@ -1,5 +1,6 @@
 import json
 import re
+from pyparsing import Combine, Word, nums
 from enum import Enum
 
 import stepik as api
@@ -69,35 +70,30 @@ class StepNumber(Step):
     @staticmethod
     def num_from_md(md_lines):
         st = StepNumber()
-
-        class Status(Enum):
-            QUESTION = 0
-            ANSWER = 1
-
         md_part = []
-        status = Status.QUESTION
+
+        real = Combine(Word(nums) + '.' + Word(nums))
+        integer = Word(nums)
+        num = real ^ integer
+        ans_template = 'ANSWER:' + num + ('+-' + num)[0, 1]
 
         for line in md_lines:
-            m = re.match(r"\s*ANSWER[:]*\s*(\d+\.?\d*)\s*(\+-)?\s*(\d*\.?\d*)\s*", line)
-            if m:
-                exp = float(m.group(1))
-                var = float(m.group(3)) if m.group(3) != '' else 0
+            ans = None
 
-                if status == Status.QUESTION:
-                    # first answer begin, question end
-                    status = Status.ANSWER
-                    st.text = html(md_part)
-                    st.add_answer(exp, var)
-                elif status == Status.ANSWER:
-                    # next variant, commit previous variant
-                    st.add_answer(exp, var)
+            if line.startswith('ANSWER:') and '+-' in line:
+                ans = ans_template.parseString(line)
+                exp = float(ans[1])
+                var = float(ans[3])
+            elif line.startswith('ANSWER:'):
+                ans = ans_template.parseString(line)
+                exp = float(ans[1])
+                var = 0
+
+            if ans:
+                st.text = html(md_part)
+                st.add_answer(exp, var)
             else:
-                m_answer = re.match(r'\s*END\s*', line)
-                if m_answer and status == Status.ANSWER:
-                    # end of question
-                    return st
-                else:
-                    # continue a question or answer
-                    md_part.append(line)
+                # continue a question or answer
+                md_part.append(line)
 
         return st
