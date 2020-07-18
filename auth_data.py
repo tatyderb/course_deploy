@@ -2,8 +2,6 @@
 Authentication data for Stepik + get token
 """
 
-import sys
-
 API_HOST = 'https://stepik.org'
 
 # Enter parameters below:
