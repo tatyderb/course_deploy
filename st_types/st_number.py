@@ -1,6 +1,6 @@
 import json
 import re
-import parse
+from pyparsing import Combine, Word, nums
 from enum import Enum
 
 import stepik as api
@@ -72,19 +72,24 @@ class StepNumber(Step):
         st = StepNumber()
         md_part = []
 
-        for line in md_lines:
-            p = None
+        real = Combine(Word(nums) + '.' + Word(nums))
+        integer = Word(nums)
+        num = real ^ integer
+        ans_template = 'ANSWER:' + num + ('+-' + num)[0, 1]
 
-            if '+-' in line:
-                p = parse.parse('ANSWER:{:^g}+-{:^g}', line)
-                exp = p[0]
-                var = p[1]
-            elif 'ANSWER' in line:
-                p = parse.parse('ANSWER:{:^g}', line)
-                exp = p[0]
+        for line in md_lines:
+            ans = None
+
+            if line.startswith('ANSWER:') and '+-' in line:
+                ans = ans_template.parseString(line)
+                exp = float(ans[1])
+                var = float(ans[3])
+            elif line.startswith('ANSWER:'):
+                ans = ans_template.parseString(line)
+                exp = float(ans[1])
                 var = 0
 
-            if p:
+            if ans:
                 st.text = html(md_part)
                 st.add_answer(exp, var)
             else:
