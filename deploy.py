@@ -11,6 +11,7 @@ markdown text
 ## QUIZ
 question in AIKEN format
 """
+import secret_check
 import md_utils
 from st_types.step import Step, StepType, from_lines
 
