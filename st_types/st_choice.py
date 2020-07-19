@@ -1,5 +1,6 @@
 import json
 import re
+from pyparsing import Word, printables, ZeroOrMore, OneOrMore, Char, alphas, srange
 from enum import Enum
 
 import stepik as api
@@ -82,6 +83,14 @@ CORRECT = {corrects}
     def from_aiken(md_lines):
         st = StepMultipleChoice()
 
+        kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
+        WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
+        # WRD = ~(Char(alphas) + (Char(')') ^ Char('.')))
+        WRDs = ZeroOrMore(WRD)
+
+        opt_template = Char(alphas) + (Char(')') ^ Char('.')) + WRDs
+        ans_template = 'ANSWER:' + OneOrMore(Char(alphas) + Char(',')[0, 1])
+
         class Status(Enum):
             QUESTION = 0
             VARIANT = 1
@@ -92,22 +101,23 @@ CORRECT = {corrects}
         status = Status.QUESTION
         for line in md_lines:
             # Is it SHUFFLE option?
-            m = re.match(r'SHUFFLE:\s*(\w+).*', line)
-            if m:
-                if m.group(1).lower() == 'true':
+            if line.startswith('SHUFFLE:'):
+                sh = ('SHUFFLE:' + WRD).parseString(line)
+
+                if sh[1].lower() == 'true':
                     st.preserve_order = False
-                elif m.group(1).lower() == 'false':
+                elif sh[1].lower() == 'false':
                     st.preserve_order = True
                 else:
-                    logger.warning(f'Unknown value SHUFFLE: [{m.group(1)}]')
+                    logger.warning(f'Unknown value SHUFFLE: [{sh[1]}]')
                 continue
 
             # variant begin by A) or A.
-            m = re.match(r'(\s*)([A-Z])([.)])(.*)', line)
-            if m:
-                letter = m.group(2)
-                # sep = m.group(3)
-                txt = m.group(4)+'\n'
+            if line == opt_template:
+                opt = opt_template.parseString(line)
+
+                letter = opt[0]
+                txt = ' '.join(opt[2:])
 
                 if status == Status.QUESTION:
                     # first answer begin, question end
@@ -118,19 +128,21 @@ CORRECT = {corrects}
                     st.add_option(md_part)
                 md_part = [txt]
                 letter_seq.append(letter)
+            elif line == ans_template and status == Status.VARIANT:
+                # end of question
+                st.add_option(md_part)
+
+                ans = ans_template.parseString(line)
+                ans_str = " ".join(ans[1:])
+
+                logger.debug(f'group1 = {ans_str}')
+                letters = [s.strip() for s in ans_str.split(',')]
+                logger.debug(f'letters={letters}')
+                st.is_multiple_choice = len(letters) > 1
+                for letter in letters:
+                    ind = letter_seq.index(letter)
+                    st.options[ind]['is_correct'] = True
+                return st
             else:
-                m_answer = re.match(r'\s*ANSWER[:]*\s*([A-Z, ]+)\s*', line)
-                if m_answer and status == Status.VARIANT:
-                    # end of question
-                    st.add_option(md_part)
-                    logger.debug(f'group1 = {m_answer.group(1)}')
-                    letters = [s.strip() for s in m_answer.group(1).split(',')]
-                    logger.debug(f'letters={letters}')
-                    st.is_multiple_choice = len(letters) > 1
-                    for letter in letters:
-                        ind = letter_seq.index(letter)
-                        st.options[ind]['is_correct'] = True
-                    return st
-                else:
-                    # continue a question or answer
-                    md_part.append(line)
+                # continue a question or answer
+                md_part.append(line)
