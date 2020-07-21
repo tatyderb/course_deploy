@@ -1,6 +1,6 @@
 import json
 import re
-from pyparsing import Word, printables, OneOrMore
+from pyparsing import Word, printables, ZeroOrMore, srange
 from enum import Enum
 
 import stepik as api
@@ -70,8 +70,8 @@ ANSWER: {pattern}
         md_part = []
 
         kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
-        WRD = Word(printables + kir_letter)
-        WRDs = OneOrMore(WRD)
+        WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
+        WRDs = ZeroOrMore(WRD)
         ans_template = 'ANSWER:' + WRDs
 
         for line in md_lines:
@@ -81,7 +81,7 @@ ANSWER: {pattern}
                 ans = ans_template.parseString(line)
                 st.pattern = ' '.join(ans[1:])
 
-            if ans:
+            if ans is not None:
                 st.text = html(md_part)
                 return st
             else:
