@@ -1,11 +1,7 @@
 import json
-import re
-from enum import Enum
 
 import stepik as api
 from md_utils import html
-
-from pprint import pprint, pformat
 
 import logging
 logger = logging.getLogger('deploy_scripts')

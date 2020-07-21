@@ -1,14 +1,8 @@
-import json
-import re
 from pyparsing import Word, printables, ZeroOrMore, OneOrMore, Char, alphas, srange
 from enum import Enum
 
-import stepik as api
-from md_utils import html
-
 from st_types.st_basic import Step, StepType
-
-from pprint import pprint, pformat
+from md_utils import html
 
 import logging
 logger = logging.getLogger('deploy_scripts')

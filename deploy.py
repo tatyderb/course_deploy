@@ -19,14 +19,10 @@ from pyparsing import Char, Word, CharsNotIn, \
     OneOrMore, ZeroOrMore, printables, srange, \
     nums
 from enum import Enum
-import json
-import logging
+
 import os
 import os.path as op
-import pprint
-import re
-import sys
-
+import logging
 
 logger = None
 
