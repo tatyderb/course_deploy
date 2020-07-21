@@ -1,12 +1,12 @@
 import json
 import re
-from pyparsing import Word, printables, ZeroOrMore, srange
+from pyparsing import Word, printables, ZeroOrMore, srange, alphas
 from enum import Enum
 
 import stepik as api
 from md_utils import html
 
-from st_types.st_basic import Step, StepType
+from st_types.st_basic import Step, StepType, bool_check
 
 from pprint import pprint, pformat
 
@@ -42,14 +42,22 @@ class StepString(Step):
 
     def __init__(self):
         super().__init__()
-        self.pattern = ''
-        self.name = 'string'
         self.step_type = StepType.STRING
+        self.name = 'string'
+        self.pattern = ''
+
+        self.match_substring = False
+        self.case_sensitive = False
+        self.use_re = False
 
     def dict(self):
         d = super().dict()
         d['stepSource']['block']['source']['pattern'] = self.pattern
         d['stepSource']['block']['text'] = self.text
+
+        d['stepSource']['block']['source']['match_substring'] = self.match_substring
+        d['stepSource']['block']['source']['case_sensitive'] = self.case_sensitive
+        d['stepSource']['block']['source']['use_re'] = self.use_re
         return d
 
     def html(self, position=None):
@@ -64,6 +72,19 @@ ANSWER: {pattern}
 '''
         return HTML.format(position, question=self.text, pattern=self.pattern)
 
+    """@staticmethod
+    def bool_check(param_name, line):
+        if line.startswith(param_name + ':'):
+            sh = (param_name + ':' + Word(alphas)).parseString(line)
+
+            if sh[1].lower() == 'true':
+                return True
+            elif sh[1].lower() == 'false':
+                return False
+            else:
+                logger.warning(f'Unknown value' + param_name + ': [{sh[1]}]')
+                return False"""
+
     @staticmethod
     def str_from_md(md_lines):
         st = StepString()
@@ -77,6 +98,18 @@ ANSWER: {pattern}
         for line in md_lines:
             ans = None
 
+            if line.startswith('SUBSTR:'):
+                st.match_substring = bool_check('SUBSTR', line)
+                continue
+
+            if line.startswith('CASESENSE:'):
+                st.case_sensitive = bool_check('CASESENSE', line)
+                continue
+
+            if line.startswith('USE_RE:'):
+                st.use_re = bool_check('USE_RE', line)
+                continue
+
             if line.startswith('ANSWER:'):
                 ans = ans_template.parseString(line)
                 st.pattern = ' '.join(ans[1:])
@@ -89,6 +122,7 @@ ANSWER: {pattern}
                 md_part.append(line)
 
         return st
+
 
 
 
