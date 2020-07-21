@@ -56,4 +56,4 @@ ANSWER: 3.1415 +- 0.01
 
 Попросим студента написать "MIPT". Напишите "MIPT".
 
-PATTERN: MIPT
+ANSWER: MIPT
