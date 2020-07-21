@@ -1,12 +1,12 @@
 import json
 import re
-from pyparsing import Word, printables, ZeroOrMore, srange
+from pyparsing import OneOrMore
 from enum import Enum
 
 import stepik as api
 from md_utils import html
 
-from st_types.st_basic import Step, StepType
+from st_types.st_basic import Step, StepType, WRD
 
 from pprint import pprint, pformat
 
@@ -69,9 +69,7 @@ ANSWER: {pattern}
         st = StepString()
         md_part = []
 
-        kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
-        WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
-        WRDs = ZeroOrMore(WRD)
+        WRDs = OneOrMore(WRD)
         ans_template = 'ANSWER:' + WRDs
 
         for line in md_lines:
