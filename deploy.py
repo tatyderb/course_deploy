@@ -194,6 +194,7 @@ def print_to_html_file(md_filename, steps, allow_step_types=StepType.FULL):
     print('steps =', len(steps))
     
     with open(filename, 'w', encoding='utf-8') as fout:
+        fout.write('<meta charset="utf-8">')
         for sti, st in enumerate(steps):
             if st.step_type & allow_step_types:
                 # fout.write(st.text)
