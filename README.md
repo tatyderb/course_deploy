@@ -56,9 +56,9 @@ TYPE может быть следующим:
 
 * STRING - вопрос, ответом на который является слово или строка.
   Примеры использования [здесь](https://github.com/tatyderb/course_deploy/blob/master/examples/question_example.md).
-  * Ответ записывается в виде: `PATTERN: Слово`
-  * Правильный ответ только один. От ученика требуется полнонстью совпадающий с паттерном ответ
-    (в т.ч. учитывается регистр).
+  * Ответ записывается в виде: `ANSWER: Слово`
+  * Правильный ответ только один. От ученика требуется полностью совпадающий с паттерном ответ
+    (учитывается регистр, ответом может быть слово, словосочетание или предложене, но кол-во пробелов не учитывается).
 
 * VIDEO - далее идет урл на видео в формате `video=https://d3c33hcgiwev3.cloudfront.net/KYDrAeHNEeiAgQrXx6bp4g.processed/full/360p/index.mp4?Expires=1563753600&Signature=V1YOioA-2y8C52Sf-tHLBnBxfAfu3lP2gUV4eajalMH-lA-uJC1xWPfbfBFOy90BHfoSqxk7raYONL0FlrF18NDaTxLkrKZ~~GB4QD5YxNCEPqug2HQQf4itZkf0M4GkwgPWZX9~QXkJjgX9x0LyhflLCgfCxCrZhY8AnpwgPes_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A`
 
