@@ -1,16 +1,12 @@
-import json
-import re
-from pyparsing import Word, printables, ZeroOrMore, OneOrMore, Char, alphas, srange
 from enum import Enum
-
-import stepik as api
-from md_utils import html
-
-from st_types.st_basic import Step, StepType
-
-from pprint import pprint, pformat
-
+import json
 import logging
+from md_utils import html
+from pyparsing import ZeroOrMore, OneOrMore, Char, alphas
+
+from st_types.st_basic import Step, StepType, WRD, bool_check
+
+
 logger = logging.getLogger('deploy_scripts')
 
 
@@ -83,9 +79,6 @@ CORRECT = {corrects}
     def from_aiken(md_lines):
         st = StepMultipleChoice()
 
-        kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
-        WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
-        # WRD = ~(Char(alphas) + (Char(')') ^ Char('.')))
         WRDs = ZeroOrMore(WRD)
 
         opt_template = Char(alphas) + (Char(')') ^ Char('.')) + WRDs
@@ -101,7 +94,7 @@ CORRECT = {corrects}
         status = Status.QUESTION
         for line in md_lines:
             # Is it SHUFFLE option?
-            if line.startswith('SHUFFLE:'):
+            """if line.startswith('SHUFFLE:'):
                 sh = ('SHUFFLE:' + WRD).parseString(line)
 
                 if sh[1].lower() == 'true':
@@ -110,6 +103,10 @@ CORRECT = {corrects}
                     st.preserve_order = True
                 else:
                     logger.warning(f'Unknown value SHUFFLE: [{sh[1]}]')
+                continue"""
+
+            if line.startswith('SHUFFLE:'):
+                st.preserve_order = not bool_check('SHUFFLE', line)  # единсвенная проблема в том, что при неправильном написании true или false будет автоматом ставиться true
                 continue
 
             # variant begin by A) or A.

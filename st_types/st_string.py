@@ -1,16 +1,9 @@
-import json
-import re
-from pyparsing import Word, printables, ZeroOrMore, srange
-from enum import Enum
-
-import stepik as api
-from md_utils import html
-
-from st_types.st_basic import Step, StepType
-
-from pprint import pprint, pformat
-
 import logging
+from md_utils import html
+from pyparsing import OneOrMore
+
+from st_types.st_basic import Step, StepType, WRD, bool_check
+
 logger = logging.getLogger('deploy_scripts')
 
 
@@ -42,14 +35,22 @@ class StepString(Step):
 
     def __init__(self):
         super().__init__()
-        self.pattern = ''
-        self.name = 'string'
         self.step_type = StepType.STRING
+        self.name = 'string'
+        self.pattern = ''
+
+        self.match_substring = False
+        self.case_sensitive = False
+        self.use_re = False
 
     def dict(self):
         d = super().dict()
         d['stepSource']['block']['source']['pattern'] = self.pattern
         d['stepSource']['block']['text'] = self.text
+
+        d['stepSource']['block']['source']['match_substring'] = self.match_substring
+        d['stepSource']['block']['source']['case_sensitive'] = self.case_sensitive
+        d['stepSource']['block']['source']['use_re'] = self.use_re
         return d
 
     def html(self, position=None):
@@ -64,18 +65,41 @@ ANSWER: {pattern}
 '''
         return HTML.format(position, question=self.text, pattern=self.pattern)
 
+    """@staticmethod
+    def bool_check(param_name, line):
+        if line.startswith(param_name + ':'):
+            sh = (param_name + ':' + Word(alphas)).parseString(line)
+
+            if sh[1].lower() == 'true':
+                return True
+            elif sh[1].lower() == 'false':
+                return False
+            else:
+                logger.warning(f'Unknown value' + param_name + ': [{sh[1]}]')
+                return False"""
+
     @staticmethod
     def str_from_md(md_lines):
         st = StepString()
         md_part = []
 
-        kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
-        WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
-        WRDs = ZeroOrMore(WRD)
+        WRDs = OneOrMore(WRD)
         ans_template = 'ANSWER:' + WRDs
 
         for line in md_lines:
             ans = None
+
+            if line.startswith('SUBSTR:'):
+                st.match_substring = bool_check('SUBSTR', line)
+                continue
+
+            if line.startswith('CASESENSE:'):
+                st.case_sensitive = bool_check('CASESENSE', line)
+                continue
+
+            if line.startswith('USE_RE:'):
+                st.use_re = bool_check('USE_RE', line)
+                continue
 
             if line.startswith('ANSWER:'):
                 ans = ans_template.parseString(line)
@@ -89,87 +113,3 @@ ANSWER: {pattern}
                 md_part.append(line)
 
         return st
-
-
-
-
-"""
-        for line in md_lines:
-            m = re.match(r"\s*PATTERN[:]\s*(.*)\s*", line)
-            if m:
-                pattern = m.group(1)
-
-                if status == Status.QUESTION:
-                    # answer begin, question end
-                    status = Status.ANSWER
-                    st.text = html(md_part)
-                    st.pattern = pattern
-                elif status == Status.ANSWER:
-                    st.pattern = pattern
-            elif status == Status.ANSWER:
-                # end of question
-                return st
-            else:
-                # continue a question or answer
-                md_part.append(line)
-
-        return st
-"""
-
-
-"""
-    def str_from_md(md_lines):
-        st = StepString()
-
-        class Status(Enum):
-            QUESTION = 0
-            FLAGS = 1
-            ANSWER = 2
-
-        md_part = []
-        status = Status.QUESTION
-
-        for line in md_lines:
-            # Is it SHUFFLE option?
-            m = re.match(r'FLAGS:\s*(SUBSTR)?\s*(CASE)?\s*', line)
-            if m:
-                if m.group(1) is not None:
-                    st.DATA_TEMPLATE['stepSource']['block']['source']['match_substring'] = True
-                elif m.group(2) is not None:
-                    st.DATA_TEMPLATE['stepSource']['block']['source']['case_sensitive'] = True
-                continue
-            else:
-                mp = re.match(r'FLAGS:\s*(.*)\s*', line)
-                if mp and status == Status.VARIANT:
-                    # end of question
-                    st.add_option(md_part)
-                    logger.debug(f'group1 = {m_answer.group(1)}')
-                    letters = [s.strip() for s in m_answer.group(1).split(',')]
-                    logger.debug(f'letters={letters}')
-                    st.is_multiple_choice = len(letters) > 1
-                    for letter in letters:
-                        ind = letter_seq.index(letter)
-                        st.options[ind]['is_correct'] = True
-                    return st
-                else:
-                    # continue a question or answer
-                    md_part.append(line)
-
-            else:
-                m_answer = re.match(r'\s*ANSWER[:]*\s*([A-Z, ]+)\s*', line)
-                if m_answer and status == Status.VARIANT:
-                    # end of question
-                    st.add_option(md_part)
-                    logger.debug(f'group1 = {m_answer.group(1)}')
-                    letters = [s.strip() for s in m_answer.group(1).split(',')]
-                    logger.debug(f'letters={letters}')
-                    st.is_multiple_choice = len(letters) > 1
-                    for letter in letters:
-                        ind = letter_seq.index(letter)
-                        st.options[ind]['is_correct'] = True
-                    return st
-                else:
-                    # continue a question or answer
-                    md_part.append(line)
-
-        return st"""
