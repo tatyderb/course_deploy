@@ -18,14 +18,10 @@ from st_types.st_basic import WRD
 
 from pyparsing import Char, Word, CharsNotIn, ZeroOrMore, nums
 from enum import Enum
-import json
-import logging
+
 import os
 import os.path as op
-import pprint
-import re
-import sys
-
+import logging
 
 logger = None
 

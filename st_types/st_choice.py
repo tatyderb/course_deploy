@@ -1,16 +1,12 @@
-import json
-import re
-from pyparsing import ZeroOrMore, OneOrMore, Char, alphas
 from enum import Enum
-
-import stepik as api
+import json
+import logging
 from md_utils import html
+from pyparsing import ZeroOrMore, OneOrMore, Char, alphas
 
 from st_types.st_basic import Step, StepType, WRD
 
-from pprint import pprint, pformat
 
-import logging
 logger = logging.getLogger('deploy_scripts')
 
 
