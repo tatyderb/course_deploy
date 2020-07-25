@@ -1,10 +1,11 @@
 import json
+import logging
+from md_utils import html
+from pyparsing import Word, alphas
 
 import stepik as api
-from md_utils import html
 
-from pyparsing import Word, printables, srange
-import logging
+
 logger = logging.getLogger('deploy_scripts')
 
 
@@ -145,5 +146,21 @@ class Step:
         return self.dict() == other.dict()
 
 
+
+def bool_check(param_name, line):
+    template = param_name + ':' + Word(alphas)
+    if line == template:
+        sh = template.parseString(line)
+
+        if sh[1].lower() == 'true':
+            return True
+        elif sh[1].lower() == 'false':
+            return False
+        else:
+            logger.warning(f'Unknown value' + param_name + ': [{sh[1]}]')
+            return False
+    else:
+        return False
+      
 kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
 WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
