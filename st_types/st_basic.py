@@ -1,10 +1,7 @@
 import json
 import logging
-from md_utils import html
-from pyparsing import Word, alphas
-
 import stepik as api
-
+from pyparsing import Word, alphas, printables, srange
 
 logger = logging.getLogger('deploy_scripts')
 
@@ -84,29 +81,6 @@ class Step:
         logger.debug(self)
 
     @staticmethod
-    def from_lines(lines):
-        """Create Step object from lines of markdown text, first line has
-        ## [QUIZ] text
-        return Step object
-        """
-        lines[0] = lines[0].strip()
-        # ## text | ## long text | ## QUIZ text
-        h2, stype, *a = lines[0].split()
-        if h2 != '##':
-            logger.error('Expected step header format "## [QUIZ] text"')
-            logger.error(f"now: {lines[0]}")
-            return None
-
-        if stype == 'QUIZ':
-            st = StepMultipleChoice.from_aiken(lines[1:])
-        elif stype == 'NUMBER':
-            st = StepNumber.num_from_md(lines[1:])
-        else:  # Text
-            st = Step()
-            st.text = html(lines)
-        return st
-
-    @staticmethod
     def get(step_id):
         """create Step using GET request /api/step-sources/{step_id} """
         json_st = api.fetch_object('step-source', step_id)
@@ -146,7 +120,6 @@ class Step:
         return self.dict() == other.dict()
 
 
-
 def bool_check(param_name, line):
     template = param_name + ':' + Word(alphas)
     if line == template:
@@ -161,6 +134,7 @@ def bool_check(param_name, line):
             return False
     else:
         return False
-      
+
+
 kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
 WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))

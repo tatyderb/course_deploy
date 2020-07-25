@@ -1,9 +1,9 @@
+import logging
 from pyparsing import Combine, Word, nums
 
 from st_types.st_basic import Step, StepType
 from md_utils import html
 
-import logging
 logger = logging.getLogger('deploy_scripts')
 
 
