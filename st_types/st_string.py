@@ -1,16 +1,9 @@
-import json
-import re
-from pyparsing import Word, printables, ZeroOrMore, srange, alphas
-from enum import Enum
-
-import stepik as api
-from md_utils import html
-
-from st_types.st_basic import Step, StepType, bool_check
-
-from pprint import pprint, pformat
-
 import logging
+from md_utils import html
+from pyparsing import OneOrMore
+
+from st_types.st_basic import Step, StepType, WRD, bool_check
+
 logger = logging.getLogger('deploy_scripts')
 
 
@@ -90,9 +83,7 @@ ANSWER: {pattern}
         st = StepString()
         md_part = []
 
-        kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
-        WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
-        WRDs = ZeroOrMore(WRD)
+        WRDs = OneOrMore(WRD)
         ans_template = 'ANSWER:' + WRDs
 
         for line in md_lines:
