@@ -6,6 +6,7 @@ import stepik as api
 from md_utils import html
 
 from pprint import pprint, pformat
+from pyparsing import Word, printables, srange
 
 import logging
 logger = logging.getLogger('deploy_scripts')
@@ -148,3 +149,7 @@ class Step:
         if isinstance(other, dict):
             return self.dict() == other
         return self.dict() == other.dict()
+
+
+kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
+WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))

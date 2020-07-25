@@ -1,12 +1,12 @@
 import json
 import re
-from pyparsing import Word, printables, ZeroOrMore, OneOrMore, Char, alphas, srange
+from pyparsing import ZeroOrMore, OneOrMore, Char, alphas
 from enum import Enum
 
 import stepik as api
 from md_utils import html
 
-from st_types.st_basic import Step, StepType
+from st_types.st_basic import Step, StepType, WRD
 
 from pprint import pprint, pformat
 
@@ -83,9 +83,6 @@ CORRECT = {corrects}
     def from_aiken(md_lines):
         st = StepMultipleChoice()
 
-        kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
-        WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
-        # WRD = ~(Char(alphas) + (Char(')') ^ Char('.')))
         WRDs = ZeroOrMore(WRD)
 
         opt_template = Char(alphas) + (Char(')') ^ Char('.')) + WRDs
