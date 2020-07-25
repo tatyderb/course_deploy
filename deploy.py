@@ -14,10 +14,9 @@ question in AIKEN format
 import secret_check
 import md_utils
 from st_types.step import Step, StepType, from_lines
+from st_types.st_basic import WRD
 
-from pyparsing import Char, Word, CharsNotIn, \
-    OneOrMore, ZeroOrMore, printables, srange, \
-    nums
+from pyparsing import Char, Word, CharsNotIn, ZeroOrMore, nums
 from enum import Enum
 
 import os
@@ -86,24 +85,20 @@ def parse_lesson(lines, debug_format=False):
 
     sharp = Char('#')
     not_sh = CharsNotIn('#')
-
-    kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
-    WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
     WRDs = ZeroOrMore(WRD)
+    H2_template = (sharp * 2) + not_sh + WRDs
+    header_template = sharp + not_sh + WRDs
 
     for line_to, line in enumerate(lines):
         line = line.rstrip()
+
         if not line:
             continue
+
         if status == Status.LESSON_HEADER:                          # # lesson header
-
-            # m = re.match(r'(#[^#])(.*)', line)
-            header_template = sharp + not_sh + WRDs
-
             if not line == header_template:
                 error(f'Expect lesson header # text, status={status}, now = {line}')
 
-            # lesson_header = m.group(2)
             m = header_template.parseString(line)
             lesson_header = m[1]
 
@@ -112,13 +107,11 @@ def parse_lesson(lines, debug_format=False):
 
         elif status == Status.LESSON_ID:                            # lesson = lesson_id
 
-            # m = re.match(r'(\s*lesson\s*=\s*)(\d+)', line)
             id_template = 'lesson' + Char('=') + Word(nums)
 
             if not line == id_template:
                 error(f'Expect lesson header # text, status={status}, now = {line}')
 
-            # lesson_id = int(m.group(2))
             lesson = id_template.parseString(line)
             lesson_id = int(lesson[2])
 
@@ -130,19 +123,13 @@ def parse_lesson(lines, debug_format=False):
                 commit_whole_file_as_1_step(steps, lesson_id, lines)
 
         elif status == Status.LESSON_TEXT:                          # text before first h2
-
-            txt_template = (sharp * 2) + not_sh + WRDs
-
-            if line == txt_template:
+            if line == H2_template:
                 lesson_text = md_utils.html(lines[line_from: line_to])
                 status = Status.H2
                 line_from = line_to
 
         elif status == Status.STEP_BODY:
-
-            body_template = (sharp * 2) + not_sh + WRDs
-
-            if line == body_template:
+            if line == H2_template:
                 commit_step(steps, lesson_id, lines[line_from: line_to])
                 status = Status.H2
                 line_from = line_to

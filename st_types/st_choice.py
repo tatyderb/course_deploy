@@ -1,10 +1,12 @@
-from pyparsing import Word, printables, ZeroOrMore, OneOrMore, Char, alphas, srange
 from enum import Enum
-
-from st_types.st_basic import Step, StepType
-from md_utils import html
-
+import json
 import logging
+from md_utils import html
+from pyparsing import ZeroOrMore, OneOrMore, Char, alphas
+
+from st_types.st_basic import Step, StepType, WRD
+
+
 logger = logging.getLogger('deploy_scripts')
 
 
@@ -77,9 +79,6 @@ CORRECT = {corrects}
     def from_aiken(md_lines):
         st = StepMultipleChoice()
 
-        kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
-        WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
-        # WRD = ~(Char(alphas) + (Char(')') ^ Char('.')))
         WRDs = ZeroOrMore(WRD)
 
         opt_template = Char(alphas) + (Char(')') ^ Char('.')) + WRDs

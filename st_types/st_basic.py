@@ -3,6 +3,7 @@ import json
 import stepik as api
 from md_utils import html
 
+from pyparsing import Word, printables, srange
 import logging
 logger = logging.getLogger('deploy_scripts')
 
@@ -44,7 +45,6 @@ class Step:
         return repr(self.dict())
 
     def __str__(self):
-        # return pformat(self.dict())
         return json.dumps(self.dict(), indent=4)
 
     def html(self, position=None):
@@ -75,7 +75,6 @@ class Step:
     def from_json(self, src):
         """ Set attributes from GET json"""
         logger.debug('=======================')
-        # pprint(src)
         self.id = src['id']
         self.lesson_id = src['lesson']
         self.position = src['position']
@@ -144,3 +143,7 @@ class Step:
         if isinstance(other, dict):
             return self.dict() == other
         return self.dict() == other.dict()
+
+
+kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
+WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
