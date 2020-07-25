@@ -13,7 +13,7 @@ question in AIKEN format
 """
 import secret_check
 import md_utils
-from st_types.step import Step, StepType, from_lines
+from st_types.steps import Step, StepType, from_lines
 from st_types.st_basic import WRD
 
 from pyparsing import Char, Word, CharsNotIn, ZeroOrMore, nums

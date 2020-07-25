@@ -1,11 +1,9 @@
-from enum import Enum
-import json
 import logging
-from md_utils import html
+from enum import Enum
 from pyparsing import ZeroOrMore, OneOrMore, Char, alphas
 
+from md_utils import html
 from st_types.st_basic import Step, StepType, WRD, bool_check
-
 
 logger = logging.getLogger('deploy_scripts')
 
