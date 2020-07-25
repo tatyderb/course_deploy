@@ -26,7 +26,8 @@ class Step:
                 'text': 'new text'  # set new text as html
             },
             'lesson': 0,  # set lesson_id - нет в get
-            'position': 1  # set step position in lesson, start with 1.
+            'position': 1,  # set step position in lesson, start with 1.
+            'cost': 2
         }
     }
 
