@@ -4,6 +4,7 @@ from st_types.st_basic import Step, StepType
 from st_types.st_number import StepNumber
 from st_types.st_choice import StepMultipleChoice
 from st_types.st_string import StepString
+from st_types.st_task import StepTask
 
 
 import logging
@@ -33,6 +34,8 @@ def from_lines(lines):
         st = StepNumber.num_from_md(lines[1:])
     elif stype == 'STRING':
         st = StepString.str_from_md(lines[1:])
+    elif stype == 'TASK':
+        st = StepTask.task_from_md(lines[1:])
     else:  # Text
         st = Step()
         st.text = html(lines)
