@@ -66,7 +66,7 @@ class StepTask(Step):
         self.text = ''
         self.code = ''
         self.name = 'code'
-        self.test_cases = [['8 11\n', '19\n']]
+        self.test_cases = []
 
         self.params = {
             'name': None,
@@ -175,12 +175,22 @@ CODE:
         statement = self.params['statement']
 
         self.text = (repo / statement).read_text()
-        self.test_cases = self.make_test_list()
+        self.make_test_list()
 
         print(self.text)
 
     def make_test_list(self):
-        return [['10 2\n', '12\n'], ['1 3\n', '4\n']]
+        repo = self.params['repo']
+        tst_dir = self.params['tests']
+
+        tests = Path(repo) / tst_dir
+
+        for data in Path(tests).glob('*.dat'):
+            ans = Path(tests) / (data.stem + '.ans')
+            if not ans.exists():
+                logger.warning('Where is answer!?')
+                exit()
+            self.add_sample(data.read_text(), ans.read_text())
 
     @staticmethod
     def task_from_md(md_lines):
