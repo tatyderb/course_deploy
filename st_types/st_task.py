@@ -63,6 +63,7 @@ class StepTask(Step):
 
     def __init__(self):
         super().__init__()
+        self.cost = 5
         self.text = ''
         self.code = ''
         self.name = 'code'
@@ -83,6 +84,7 @@ class StepTask(Step):
     def dict(self):
         d = super().dict()
 
+        d['stepSource']['cost'] = self.cost
         d['stepSource']['block']['text'] = self.text if self.text != '' else StepTask.default_text
         d['stepSource']['block']['source']['code'] = self.code if self.code != '' else StepTask.default_code
         d['stepSource']['block']['source']['test_cases'] = self.test_cases
@@ -113,7 +115,7 @@ CODE:
 
         return HTML.format(position, question=question, tests=tests, code=code)
 
-    def add_sample(self, str_in, str_out):  # todo: надо ли
+    def add_sample(self, str_in, str_out):
         sample = [str_in, str_out]
         self.test_cases.append(sample)
 
@@ -161,7 +163,9 @@ CODE:
             is_OK = False
 
         if self.params['score'] is None:
-            self.params['score'] = 10
+            self.cost = 10
+        else:
+            self.cost = self.params['score']
 
         return is_OK
 
@@ -175,9 +179,8 @@ CODE:
         statement = self.params['statement']
 
         self.text = (repo / statement).read_text()
+        self.cost = self.params['score']
         self.make_test_list()
-
-        print(self.text)
 
     def make_test_list(self):
         repo = self.params['repo']
@@ -205,7 +208,7 @@ CODE:
         checker_template = 'checker' + equality
         solution_template = 'solution' + equality
         tests_template = 'tests' + equality
-        score_template = 'tests' + Char('=') + Word(nums)
+        score_template = 'score' + Char('=') + Word(nums)
 
         for line in md_lines:
             # print(line)
@@ -235,7 +238,7 @@ CODE:
                 st.params['tests'] = tests
             elif line == score_template:
                 score = score_template.parseString(line)[2]
-                st.params['tests'] = score
+                st.params['score'] = int(score)
 
         st.set_attrs()
 
