@@ -13,8 +13,9 @@ class StepType:
     VIDEO = 8
     NUMBER = 16
     STRING = 32
+    TASK = 64
     SKIP = 0
-    FULL = TEXT | QUESTION | PROBLEM | VIDEO | NUMBER | STRING
+    FULL = TEXT | QUESTION | PROBLEM | VIDEO | NUMBER | STRING | TASK
 
 
 class Step:
