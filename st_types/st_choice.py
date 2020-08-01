@@ -25,7 +25,8 @@ class StepMultipleChoice(Step):
                 }
             },
             'lesson': None,
-            'position': None
+            'position': None,
+            'cost': 2
         }
     }
     OPTION_TEMPLATE = {'is_correct': False, 'text': '2+2=3', 'feedback': ''}
