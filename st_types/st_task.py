@@ -2,7 +2,7 @@ from pyparsing import Word, OneOrMore, Char, nums
 from pathlib import Path
 from enum import Enum
 
-from st_types.st_basic import Step, StepType, WRD
+from st_types.st_basic import Step, StepType, WRD, COST_DEFAULT_TASK
 
 
 import logging
@@ -41,7 +41,7 @@ class StepTask(Step):
                                     'двух чисел.',
                             'video': None
                         },
-                    'cost': 10,
+                    'cost': COST_DEFAULT_TASK,
                     'lesson': None,
                     'position': None
                 }
@@ -63,7 +63,7 @@ class StepTask(Step):
 
     def __init__(self):
         super().__init__()
-        self.cost = 5
+        self.cost = COST_DEFAULT_TASK
         self.text = ''
         self.code = ''
         self.name = 'code'
@@ -125,13 +125,14 @@ CODE:
         if self.params['repo'] is None:
             logger.warning("'repo' param wasn't entered")
             is_OK = False
+            exit(1)
         elif not Path(self.params['repo']).exists():
             logger.warning("repo wrong way")
             is_OK = False
+            exit(1)
         else:
             logger.info('REPO OK')
-
-        repo = Path(self.params['repo'])
+            repo = Path(self.params['repo'])
 
         if self.params['statement'] is None:
             state_name = repo.name + '.xml'
@@ -163,7 +164,7 @@ CODE:
             is_OK = False
 
         if self.params['score'] is None:
-            self.cost = 10
+            self.cost = COST_DEFAULT_TASK
         else:
             self.cost = self.params['score']
 

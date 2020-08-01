@@ -1,7 +1,7 @@
 import logging
 from pyparsing import Combine, Word, nums
 
-from st_types.st_basic import Step, StepType
+from st_types.st_basic import Step, StepType, COST_DEFAULT
 from md_utils import html
 
 logger = logging.getLogger('deploy_scripts')
@@ -21,7 +21,7 @@ class StepNumber(Step):
             },
             'lesson': None,
             'position': None,
-            'cost': 2
+            'cost': COST_DEFAULT
         }
     }
 
