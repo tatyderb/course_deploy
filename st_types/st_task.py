@@ -2,7 +2,7 @@ from pyparsing import Word, OneOrMore, Char, nums
 from pathlib import Path
 from enum import Enum
 
-from st_types.st_basic import Step, StepType, WRD, COST_DEFAULT_TASK
+from st_types.st_basic import Step, StepType, WRD
 
 
 import logging
@@ -41,7 +41,7 @@ class StepTask(Step):
                                     'двух чисел.',
                             'video': None
                         },
-                    'cost': COST_DEFAULT_TASK,
+                    'cost': Step.Cost.DEFAULT_TASK,
                     'lesson': None,
                     'position': None
                 }
@@ -63,7 +63,7 @@ class StepTask(Step):
 
     def __init__(self):
         super().__init__()
-        self.cost = COST_DEFAULT_TASK
+        self.cost = Step.Cost.DEFAULT_TASK
         self.text = ''
         self.code = ''
         self.name = 'code'
@@ -164,7 +164,7 @@ CODE:
             is_OK = False
 
         if self.params['score'] is None:
-            self.cost = COST_DEFAULT_TASK
+            self.cost = Step.Cost.DEFAULT_TASK
         else:
             self.cost = self.params['score']
 
