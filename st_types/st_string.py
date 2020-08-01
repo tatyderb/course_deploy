@@ -29,7 +29,8 @@ class StepString(Step):
                 'is_options_feedback': False
             },
             'lesson': None,
-            'position': None
+            'position': None,
+            'cost': 2
         }
     }
 

@@ -13,8 +13,9 @@ class StepType:
     VIDEO = 8
     NUMBER = 16
     STRING = 32
+    TASK = 64
     SKIP = 0
-    FULL = TEXT | QUESTION | PROBLEM | VIDEO | NUMBER | STRING
+    FULL = TEXT | QUESTION | PROBLEM | VIDEO | NUMBER | STRING | TASK
 
 
 class Step:
@@ -26,7 +27,8 @@ class Step:
                 'text': 'new text'  # set new text as html
             },
             'lesson': 0,  # set lesson_id - нет в get
-            'position': 1  # set step position in lesson, start with 1.
+            'position': 1,  # set step position in lesson, start with 1.
+            'cost': 2
         }
     }
 

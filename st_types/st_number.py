@@ -20,7 +20,8 @@ class StepNumber(Step):
                 }
             },
             'lesson': None,
-            'position': None
+            'position': None,
+            'cost': 2
         }
     }
 
