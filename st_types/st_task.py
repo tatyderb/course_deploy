@@ -104,11 +104,11 @@ TESTS:
 CODE:
 {code}
 '''
-        tests = '\n'.join(['<br>{})\n<p> in: {}</p> \n<p>out: {}</p>'.format(str(num + 1), tst[0], tst[1])
+        tests = '\n'.join([f'<br>{str(num + 1)})\n<p> in: {tst[0]}</p> \n<p>out: {tst[1]}</p>'
                            for num, tst in enumerate(self.test_cases)])
 
-        code = '<pre><code>{}</code></pre>'.format(self.code) if self.code != '' \
-            else '<pre><code>{}</code></pre>'.format(StepTask.default_code)
+        code = f'<pre><code>{self.code}</code></pre>' if self.code != '' \
+            else f'<pre><code>{StepTask.default_code}</code></pre>'
 
         question = self.text if self.text != '' else StepTask.default_text
 
