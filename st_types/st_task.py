@@ -1,17 +1,14 @@
 from pyparsing import Word, OneOrMore, Char, nums
 from pathlib import Path
-from enum import Enum
+import logging
 
 from st_types.st_basic import Step, StepType, WRD, COST_DEFAULT_TASK
 
-
-import logging
 
 logger = logging.getLogger('deploy_scripts')
 
 
 class StepTask(Step):
-
     DATA_TEMPLATE = \
         {
             'stepSource':
@@ -35,10 +32,7 @@ class StepTask(Step):
                                     'test_archive': [],
                                     'test_cases': [['8 11\n', '19\n']]
                                 },
-                            'text': 'Вы можете изменить условие задания в этом ' +
-                                    'поле и указать настройки ниже. <br><br> ' +
-                                    'Напишите программу, которая считает сумму ' +
-                                    'двух чисел.',
+                            'text': '',
                             'video': None
                         },
                     'cost': COST_DEFAULT_TASK,
@@ -47,19 +41,19 @@ class StepTask(Step):
                 }
         }
 
-    default_code = '# This is a sample Code Challenge\n' + \
-                   '# Learn more: https://stepik.org/lesson/9173\n' + \
-                   '# Ask your questions via support@stepik.org\n\n' + \
-                   'def generate():\n' + \
-                   '    return []\n\n' + \
-                   'def check(reply, clue):\n' + \
-                   '    return reply.strip() == clue.strip()\n\n' + \
-                   '# def solve(dataset):\n' + \
-                   '#     a, b = dataset.split()\n' + \
-                   '#     return str(int(a) + int(b))'
+    default_code = ('# This is a sample Code Challenge\n'
+                    '# Learn more: https://stepik.org/lesson/9173\n'
+                    '# Ask your questions via support@stepik.org\n\n'
+                    'def generate():\n'
+                    '    return []\n\n'
+                    'def check(reply, clue):\n'
+                    '    return reply.strip() == clue.strip()\n\n'
+                    '# def solve(dataset):\n'
+                    '#     a, b = dataset.split()\n'
+                    '#     return str(int(a) + int(b))')
 
-    default_text = '<p>Вы можете изменить условие задания в этом поле и указать настройки ниже. <br><br> ' + \
-                   'Напишите программу, которая считает сумму двух чисел.</p>'
+    default_text = ('<p>Вы можете изменить условие задания в этом поле и указать настройки ниже. <br><br>\n'
+                    'Напишите программу, которая считает сумму двух чисел.</p>')
 
     def __init__(self):
         super().__init__()
