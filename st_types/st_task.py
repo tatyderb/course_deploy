@@ -133,7 +133,8 @@ CODE:
             exit(1)
         else:
             repo = Path(self.params['repo'])
-            logger.debug('REPO OK')
+            logger.debug(f"using repo {self.params['repo']}")
+            logger.info('REPO OK')
 
         if self.params['statement'] is None:
             state_name = repo.name + '.xml'
@@ -145,6 +146,7 @@ CODE:
                 self.params['statement'] = None
             else:
                 self.params['statement'] = state_name
+                logger.debug(f"using statement {self.params['statement']}")
                 logger.info('STATEMENT OK')
         else:
             state_path = repo / self.params['statement']
@@ -154,6 +156,7 @@ CODE:
                 logger.warning(f'default statement will be set')
                 self.params['statement'] = None
             else:
+                logger.debug(f"using statement {self.params['statement']}")
                 logger.info('STATEMENT OK')
 
         # todo: name
@@ -167,7 +170,8 @@ CODE:
                 logger.warning(f"tests directory doesn't exist: {tst_path}")
 
                 if self.params['statement'] is None:  # потом тут еще проверка code будет
-                    logger.warning(f'default tests will be set')
+                    logger.debug("using default tests")
+                    logger.info('TESTS OK')
                     self.params['tests'] = None
                 else:
                     is_OK = False
@@ -175,23 +179,26 @@ CODE:
                     exit(1)
             else:
                 self.params['tests'] = 'tests'
-                logger.debug('TESTS DIR OK')
+                logger.debug(f"using tests {self.params['tests']}")
+                logger.info('TESTS DIR OK')
         elif not ((repo) / self.params['tests']).exists():
             logger.warning(f"tests directory doesn't exist: {(repo) / self.params['tests']}")
 
             if self.params['statement'] is None:  # потом тут еще проверка code будет
-                logger.warning(f'default tests will be set')
+                logger.debug("using default tests")
+                logger.info('TESTS OK')
                 self.params['tests'] = None
             else:
                 logger.error('program end...')
                 is_OK = False
                 exit(1)
         else:
-            logger.info('TESTS OK')
+            logger.debug(f"using tests {self.params['tests']}")
+            logger.info('TESTS DIR OK')
 
         if self.params['score'] is None:
             self.params['score'] = COST_DEFAULT_TASK
-            logger.info(f'default tests will be set')
+            logger.debug("using default score")
             logger.info('SCORE OK')
         else:
             logger.info('SCORE OK')
