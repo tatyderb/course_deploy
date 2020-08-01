@@ -30,7 +30,7 @@ class StepTask(Step):
                                     'samples_count': 1,
                                     'templates_data': '',
                                     'test_archive': [],
-                                    'test_cases': [['8 11\n', '19\n']]
+                                    'test_cases': []
                                 },
                             'text': '',
                             'video': None
@@ -52,8 +52,11 @@ class StepTask(Step):
                     '#     a, b = dataset.split()\n'
                     '#     return str(int(a) + int(b))')
 
-    default_text = ('<p>Вы можете изменить условие задания в этом поле и указать настройки ниже. <br><br>\n'
-                    'Напишите программу, которая считает сумму двух чисел.</p>')
+    default_text = ('<p>Текст по умолчанию.</p>\n'
+                    '<p>Напишите программу для сложения чисел<br>\n'
+                    'Вы можете изменить условие задания в этом поле и указать настройки ниже.</p>')
+
+    default_test = [['8 11\n', '19\n']]
 
     def __init__(self):
         super().__init__()
@@ -81,7 +84,7 @@ class StepTask(Step):
         d['stepSource']['cost'] = self.cost
         d['stepSource']['block']['text'] = self.text if self.text != '' else StepTask.default_text
         d['stepSource']['block']['source']['code'] = self.code if self.code != '' else StepTask.default_code
-        d['stepSource']['block']['source']['test_cases'] = self.test_cases
+        d['stepSource']['block']['source']['test_cases'] = self.test_cases if self.test_cases else StepTask.default_test
         d['stepSource']['block']['source']['samples_count'] = len(self.test_cases)
         return d
 
