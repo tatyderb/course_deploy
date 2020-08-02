@@ -197,7 +197,7 @@ CODE:
             logger.info('TESTS DIR OK')
 
         if self.params['score'] is None:
-            self.cost = Step.Cost.DEFAULT_TASK
+            self.params['score'] = Step.Cost.DEFAULT_TASK
             logger.debug("using default score")
             logger.info('SCORE OK')
         else:
