@@ -5,6 +5,9 @@ from pyparsing import Word, alphas, printables, srange
 
 logger = logging.getLogger('deploy_scripts')
 
+COST_DEFAULT = 2
+COST_DEFAULT_TASK = 10
+
 
 class StepType:
     TEXT = 1

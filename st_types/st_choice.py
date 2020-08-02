@@ -3,7 +3,7 @@ from enum import Enum
 from pyparsing import ZeroOrMore, OneOrMore, Char, alphas
 
 from md_utils import html
-from st_types.st_basic import Step, StepType, WRD, bool_check
+from st_types.st_basic import Step, StepType, WRD, bool_check, COST_DEFAULT
 
 logger = logging.getLogger('deploy_scripts')
 
@@ -26,7 +26,7 @@ class StepMultipleChoice(Step):
             },
             'lesson': None,
             'position': None,
-            'cost': 2
+            'cost': COST_DEFAULT
         }
     }
     OPTION_TEMPLATE = {'is_correct': False, 'text': '2+2=3', 'feedback': ''}
