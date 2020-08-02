@@ -2,7 +2,7 @@ import logging
 from pyparsing import OneOrMore
 
 from md_utils import html
-from st_types.st_basic import Step, StepType, WRD, bool_check, COST_DEFAULT
+from st_types.st_basic import Step, StepType, WRD, bool_check
 
 logger = logging.getLogger('deploy_scripts')
 
@@ -30,7 +30,7 @@ class StepString(Step):
             },
             'lesson': None,
             'position': None,
-            'cost': COST_DEFAULT
+            'cost': Step.Cost.DEFAULT
         }
     }
 

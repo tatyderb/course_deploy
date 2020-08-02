@@ -2,7 +2,7 @@ from pyparsing import Word, OneOrMore, Char, nums
 from pathlib import Path
 import logging
 
-from st_types.st_basic import Step, StepType, WRD, COST_DEFAULT_TASK
+from st_types.st_basic import Step, StepType, WRD
 
 
 logger = logging.getLogger('deploy_scripts')
@@ -35,7 +35,7 @@ class StepTask(Step):
                             'text': '',
                             'video': None
                         },
-                    'cost': COST_DEFAULT_TASK,
+                    'cost': Step.Cost.DEFAULT_TASK,
                     'lesson': None,
                     'position': None
                 }
@@ -60,7 +60,7 @@ class StepTask(Step):
 
     def __init__(self):
         super().__init__()
-        self.cost = COST_DEFAULT_TASK
+        self.cost = Step.Cost.DEFAULT_TASK
         self.text = ''
         self.code = ''
         self.name = 'code'
@@ -197,7 +197,7 @@ CODE:
             logger.info('TESTS DIR OK')
 
         if self.params['score'] is None:
-            self.params['score'] = COST_DEFAULT_TASK
+            self.cost = Step.Cost.DEFAULT_TASK
             logger.debug("using default score")
             logger.info('SCORE OK')
         else:

@@ -5,9 +5,6 @@ from pyparsing import Word, alphas, printables, srange
 
 logger = logging.getLogger('deploy_scripts')
 
-COST_DEFAULT = 2
-COST_DEFAULT_TASK = 10
-
 
 class StepType:
     TEXT = 1
@@ -22,6 +19,11 @@ class StepType:
 
 
 class Step:
+
+    class Cost:
+        DEFAULT = 2
+        DEFAULT_TASK = 10
+
     """ 1 step in stepik.org """
     DATA_TEMPLATE = {
         'stepSource': {
@@ -31,7 +33,7 @@ class Step:
             },
             'lesson': 0,  # set lesson_id - нет в get
             'position': 1,  # set step position in lesson, start with 1.
-            'cost': 2
+            'cost': Cost.DEFAULT
         }
     }
 
