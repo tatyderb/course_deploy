@@ -197,7 +197,7 @@ CODE:
             logger.info('TESTS DIR OK')
 
         if self.params['score'] is None:
-            self.cost = Step.Cost.DEFAULT_TASK
+            self.params['score'] = Step.Cost.DEFAULT_TASK
             logger.debug("using default score")
             logger.info('SCORE OK')
         else:
@@ -209,7 +209,7 @@ CODE:
         is_OK = self.params_check_and_fill()
 
         if not is_OK:
-            logger.warning('Task params are wrong')
+            logger.error('Task params are wrong')
             logger.error('program end...')
             exit(1)
 
