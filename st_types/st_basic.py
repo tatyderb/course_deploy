@@ -1,7 +1,7 @@
 import json
 import logging
 import stepik as api
-from pyparsing import Word, alphas, printables, srange
+from pyparsing import Word, alphas, printables, srange, alphanums
 
 logger = logging.getLogger('deploy_scripts')
 
@@ -145,3 +145,4 @@ def bool_check(param_name, line):
 
 kir_letter = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ_'
 WRD = Word(printables + kir_letter + srange(['а-я_']) + srange(['А-Я_']))
+WRD_p = Word(alphanums + kir_letter + srange(['а-я_']) + srange(['А-Я_']))

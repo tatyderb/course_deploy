@@ -14,7 +14,7 @@ question in AIKEN format
 import secret_check
 import md_utils
 from st_types.steps import Step, StepType, from_lines
-from st_types.st_basic import WRD
+from st_types.st_basic import WRD, WRD_p
 
 from pyparsing import Char, Word, CharsNotIn, ZeroOrMore, nums
 from enum import Enum
@@ -24,6 +24,8 @@ import os.path as op
 import logging
 
 logger = None
+
+param_dict = {}
 
 
 def is_empty_line(line):
@@ -55,6 +57,44 @@ def commit_whole_file_as_1_step(steps, lesson_id, lines):
     steps.append(st)
 
 
+def read_params(filename):
+    if filename is None:
+        return
+
+    with open(filename) as config:
+        str_list = list(config)
+
+    mask_eq = WRD + Char('=') + WRD
+
+    for line_to, line in enumerate(str_list):
+        if line == mask_eq:
+            parse_res = mask_eq.parseString(line)
+            param_dict[parse_res[0]] = parse_res[2]
+
+
+def param_set(tokens):
+    for idx, lex in enumerate(tokens):
+        if tokens[idx] == '{{' and tokens[idx + 1] in param_dict and tokens[idx + 2] == '}}':
+            tokens[idx] = tokens[idx + 2] = ''
+            tokens[idx + 1] = param_dict[tokens[idx + 1]]
+    return ' '.join(tokens)
+
+
+def param_substitude(lines):
+    mask_par = (CharsNotIn('{{}}')[0, ] + '{{' + WRD_p + '}}' + CharsNotIn('{{}}')[0, ])[1, ] + Char('\n')[0, 1]
+    mask_par.setParseAction(param_set)
+
+    for line_to, line in enumerate(lines):
+        line = line.rstrip()
+
+        if not line:
+            continue
+
+        lines[line_to] = mask_par.transformString(line)
+
+    return lines
+
+
 def parse_lesson(lines, debug_format=False):
     """
     Parse lesson document by format:
@@ -83,9 +123,11 @@ def parse_lesson(lines, debug_format=False):
     steps = []
     line_from = 0
 
+    WRDs = ZeroOrMore(WRD)
+
     sharp = Char('#')
     not_sh = CharsNotIn('#')
-    WRDs = ZeroOrMore(WRD)
+
     H2_template = (sharp * 2) + not_sh + WRDs
     header_template = sharp + not_sh + WRDs
 
@@ -266,7 +308,7 @@ def main():
 
     parser.add_argument('-s', '--step', type=int, default=0,
                         help='update only the step N, start N from 1, negative numbers are allowed too')
-    # parser.add_argument('-c', '--conf', type=str, default='...', help='deploy with config file')
+    parser.add_argument('-c', '--config', type=str, default=None, help='deploy with config file')
 
     args = parser.parse_args()
 
@@ -289,10 +331,13 @@ def main():
     else:
         logger.info('deploy all by default')
         deployed_step_types = StepType.FULL
-    
+
+    read_params(args.config)
+
     with open(args.markdown_filename, encoding='utf-8') as fin:
         # First step - all other steps as one page if mode = DEBUG
-        steps, lesson_header, lesson_id, lesson_text = parse_lesson(list(fin), args.debug)
+        str_list = param_substitude(list(fin))
+        steps, lesson_header, lesson_id, lesson_text = parse_lesson(str_list, args.debug)
 
     # only convert to html, no deploy to site
     if args.html:
