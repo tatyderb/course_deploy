@@ -58,6 +58,8 @@ class StepTask(Step):
 
     default_test = ['8 11\n', '19\n']
 
+    Root = Path('examples')
+
     def __init__(self):
         super().__init__()
         self.cost = Step.Cost.DEFAULT_TASK
@@ -243,8 +245,13 @@ CODE:
                 self.add_sample(data.read_text(), ans.read_text())
 
     @staticmethod
-    def task_from_md(md_lines):
+    def task_from_md(md_lines, root=None):
         st = StepTask()
+
+        if root is None:
+            root = StepTask.Root
+        else:
+            root = Path(root)
 
         WRDs = OneOrMore(WRD)
         equality = Char('=') + WRDs
@@ -262,7 +269,7 @@ CODE:
 
             if line == repo_template:
                 repo = repo_template.parseString(line)[2]
-                st.params['repo'] = Path(repo)
+                st.params['repo'] = root / repo
             elif line == score_template:
                 score = score_template.parseString(line)[2]
                 st.params['score'] = int(score)

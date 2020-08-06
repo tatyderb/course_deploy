@@ -39,7 +39,11 @@ def error(message="Error"):
 def commit_step(steps, lesson_id, lines):
     """Create Step from lines and append to steps list"""
     # st = Step.from_lines(lines)
-    st = from_lines(lines)
+
+    if 'task_root' in param_dict:
+        st = from_lines(lines, param_dict['task_root'])
+    else:
+        st = from_lines(lines)
 
     st.lesson_id = lesson_id
     st.position = len(steps) + 1
