@@ -21,6 +21,7 @@ from enum import Enum
 
 import os
 import os.path as op
+import yaml
 import logging
 
 logger = None
@@ -39,7 +40,11 @@ def error(message="Error"):
 def commit_step(steps, lesson_id, lines):
     """Create Step from lines and append to steps list"""
     # st = Step.from_lines(lines)
-    st = from_lines(lines)
+
+    if 'task_root' in param_dict:
+        st = from_lines(lines, param_dict['task_root'])
+    else:
+        st = from_lines(lines)
 
     st.lesson_id = lesson_id
     st.position = len(steps) + 1
@@ -61,22 +66,20 @@ def read_params(filename):
     if filename is None:
         return
 
-    with open(filename) as config:
-        str_list = list(config)
+    if not op.exists(filename):
+        logger.error(f"Confing file doesn't exist: {filename}")
+        exit(1)
 
-    mask_eq = WRD + Char('=') + WRD
-
-    for line_to, line in enumerate(str_list):
-        if line == mask_eq:
-            parse_res = mask_eq.parseString(line)
-            param_dict[parse_res[0]] = parse_res[2]
+    with open(filename, 'r') as stream:
+        dictionary = yaml.safe_load(stream)
+        param_dict.update(dictionary)
 
 
 def param_set(tokens):
     for idx, lex in enumerate(tokens):
         if tokens[idx] == '{{' and tokens[idx + 1] in param_dict and tokens[idx + 2] == '}}':
             tokens[idx] = tokens[idx + 2] = ''
-            tokens[idx + 1] = param_dict[tokens[idx + 1]]
+            tokens[idx + 1] = str(param_dict[tokens[idx + 1]])
     return ' '.join(tokens)
 
 
