@@ -27,7 +27,7 @@ class StepTask(Step):
                                     'is_time_limit_scaled': True,
                                     'manual_memory_limits': [],
                                     'manual_time_limits': [],
-                                    'samples_count': 3,
+                                    'samples_count': Step.DEAFAULT_TST_NUM,
                                     'templates_data': '',
                                     'test_archive': [],
                                     'test_cases': []
@@ -67,6 +67,7 @@ class StepTask(Step):
         self.code = ''
         self.name = 'code'
         self.test_cases = []
+        self.samples_count = Step.DEAFAULT_TST_NUM
         self.header = ''
         self.footer = ''
         self.lang = None
@@ -78,6 +79,7 @@ class StepTask(Step):
             'checker': None,
             'solution': None,
             'tests': None,
+            'visible_tst_num': None,
             'score': None,
             'lang': None,
             'header': None,
@@ -93,6 +95,7 @@ class StepTask(Step):
         d['stepSource']['block']['text'] = self.text
         d['stepSource']['block']['source']['code'] = self.code
         d['stepSource']['block']['source']['test_cases'] = self.test_cases
+        d['stepSource']['block']['source']['samples_count'] = self.samples_count
 
         if self.lang is not None:
             d['stepSource']['block']['source']['templates_data'] = \
@@ -214,6 +217,13 @@ CODE:
         else:
             logger.info('SCORE OK')
 
+        if self.params['visible_tst_num'] is None:
+            self.params['visible_tst_num'] = Step.Cost.DEFAULT_TASK
+            logger.debug("using default visible tests number")
+            logger.info('VISIBLE_TST_NUM OK')
+        else:
+            logger.info('VISIBLE_TST_NUM OK')
+
         self.lang = self.params['lang']
 
         if self.lang is not None:
@@ -258,6 +268,7 @@ CODE:
 
         self.code = StepTask.default_code
         self.cost = self.params['score']
+        self.samples_count = self.params['visible_tst_num']
 
     def make_test_list(self):
         repo = self.params['repo']
@@ -296,6 +307,7 @@ CODE:
         header_template = 'header' + equality
         footer_template = 'footer' + equality
         score_template = 'score' + Char('=') + Word(nums)
+        visible_tst_num_template = 'visible_tst_num' + Char('=') + Word(nums)
 
         for line in md_lines:
             # print(line)
@@ -306,6 +318,9 @@ CODE:
             elif line == score_template:
                 score = score_template.parseString(line)[2]
                 st.params['score'] = int(score)
+            elif line == visible_tst_num_template:
+                visible_tst_num = visible_tst_num_template.parseString(line)[2]
+                st.params['visible_tst_num'] = int(visible_tst_num)
 
             elif line == statement_template:
                 statement = statement_template.parseString(line)[2]

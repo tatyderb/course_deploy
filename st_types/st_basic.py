@@ -24,6 +24,8 @@ class Step:
         DEFAULT = 2
         DEFAULT_TASK = 10
 
+    DEAFAULT_TST_NUM = 1
+
     """ 1 step in stepik.org """
     DATA_TEMPLATE = {
         'stepSource': {
