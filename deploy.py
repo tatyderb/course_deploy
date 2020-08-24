@@ -41,10 +41,15 @@ def commit_step(steps, lesson_id, lines):
     """Create Step from lines and append to steps list"""
     # st = Step.from_lines(lines)
 
+    root = None
+    lang = None
+
     if 'task_root' in param_dict:
-        st = from_lines(lines, param_dict['task_root'])
-    else:
-        st = from_lines(lines)
+        root = param_dict['task_root']
+    if 'task_lang' in param_dict:
+        lang = param_dict['task_lang']
+
+    st = from_lines(lines, task_root=root, task_lang=lang)
 
     st.lesson_id = lesson_id
     st.position = len(steps) + 1
