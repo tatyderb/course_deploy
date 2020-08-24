@@ -27,7 +27,7 @@ class StepTask(Step):
                                     'is_time_limit_scaled': True,
                                     'manual_memory_limits': [],
                                     'manual_time_limits': [],
-                                    'samples_count': 1,
+                                    'samples_count': 3,
                                     'templates_data': '',
                                     'test_archive': [],
                                     'test_cases': []
@@ -87,7 +87,6 @@ class StepTask(Step):
         d['stepSource']['block']['text'] = self.text
         d['stepSource']['block']['source']['code'] = self.code
         d['stepSource']['block']['source']['test_cases'] = self.test_cases
-        d['stepSource']['block']['source']['samples_count'] = len(self.test_cases)
 
         return d
 
