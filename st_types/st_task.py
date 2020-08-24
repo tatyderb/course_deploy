@@ -95,7 +95,6 @@ class StepTask(Step):
         d['stepSource']['block']['source']['test_cases'] = self.test_cases
 
         if self.lang is not None:
-            lst = [self.header, self.footer]
             d['stepSource']['block']['source']['templates_data'] = \
                 f'::{self.lang}\n::header\n{self.header}\n::footer\n{self.footer}'
 
@@ -231,6 +230,8 @@ CODE:
                     self.footer = footer_path.read_text()
                 else:
                     logger.warning(f"FOOTER PATH DOESN'T EXIST: {footer_path}")
+        elif self.params['header'] is not None or self.params['footer'] is not None:
+            logger.warning("HEADER/FOOTER WON'T BE INSERTED: YOU HAVE TO SPECIFY TASK LANGUAGE")
 
         return is_OK
 
