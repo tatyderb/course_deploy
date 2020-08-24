@@ -67,6 +67,9 @@ class StepTask(Step):
         self.code = ''
         self.name = 'code'
         self.test_cases = []
+        self.header = ''
+        self.footer = ''
+        self.lang = None
 
         self.params = {
             'name': None,
@@ -75,7 +78,10 @@ class StepTask(Step):
             'checker': None,
             'solution': None,
             'tests': None,
-            'score': None
+            'score': None,
+            'lang': None,
+            'header': None,
+            'footer': None
         }
 
         self.step_type = StepType.TASK
@@ -87,6 +93,11 @@ class StepTask(Step):
         d['stepSource']['block']['text'] = self.text
         d['stepSource']['block']['source']['code'] = self.code
         d['stepSource']['block']['source']['test_cases'] = self.test_cases
+
+        if self.lang is not None:
+            lst = [self.header, self.footer]
+            d['stepSource']['block']['source']['templates_data'] = \
+                f'::{self.lang}\n::header\n{self.header}\n::footer\n{self.footer}'
 
         return d
 
@@ -204,6 +215,23 @@ CODE:
         else:
             logger.info('SCORE OK')
 
+        self.lang = self.params['lang']
+
+        if self.lang is not None:
+            if self.params['header'] is not None:
+                header_path = repo / self.params['header']
+                if header_path.exists():
+                    self.header = header_path.read_text()
+                else:
+                    logger.warning(f"HEADER PATH DOESN'T EXIST: {header_path}")
+
+            if self.params['footer'] is not None:
+                footer_path = repo / self.params['footer']
+                if footer_path.exists():
+                    self.footer = footer_path.read_text()
+                else:
+                    logger.warning(f"FOOTER PATH DOESN'T EXIST: {footer_path}")
+
         return is_OK
 
     def set_attrs(self):
@@ -244,13 +272,16 @@ CODE:
                 self.add_sample(data.read_text(), ans.read_text())
 
     @staticmethod
-    def task_from_md(md_lines, root=None):
+    def task_from_md(md_lines, root=None, lang=None):
         st = StepTask()
 
         if root is None:
             root = StepTask.Root
         else:
             root = Path(root)
+
+        if lang is not None:
+            st.params['lang'] = lang
 
         WRDs = OneOrMore(WRD)
         equality = Char('=') + WRDs
@@ -261,6 +292,8 @@ CODE:
         checker_template = 'checker' + equality
         solution_template = 'solution' + equality
         tests_template = 'tests' + equality
+        header_template = 'header' + equality
+        footer_template = 'footer' + equality
         score_template = 'score' + Char('=') + Word(nums)
 
         for line in md_lines:
@@ -288,6 +321,12 @@ CODE:
             elif line == tests_template:
                 tests = tests_template.parseString(line)[2]
                 st.params['tests'] = tests
+            elif line == header_template:
+                header = header_template.parseString(line)[2]
+                st.params['header'] = header
+            elif line == footer_template:
+                footer = footer_template.parseString(line)[2]
+                st.params['footer'] = footer
 
         st.set_attrs()
 

@@ -15,7 +15,7 @@ logger = logging.getLogger('deploy_scripts')
 # POST and PUT requests for updata and create step with /api/step-sources/{step_id}
 
 
-def from_lines(lines, task_root=None):
+def from_lines(lines, task_root=None, task_lang=None):
     """Create Step object from lines of markdown text, first line has
     ## [QUIZ] text
     return Step object
@@ -35,7 +35,7 @@ def from_lines(lines, task_root=None):
     elif stype == 'STRING':
         st = StepString.str_from_md(lines[1:])
     elif stype == 'TASK':
-        st = StepTask.task_from_md(lines[1:], task_root)
+        st = StepTask.task_from_md(lines[1:], task_root, task_lang)
     else:  # Text
         st = Step()
         st.text = html(lines)
