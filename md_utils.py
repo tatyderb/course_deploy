@@ -11,7 +11,7 @@ logger = logging.getLogger('deploy_scripts')
 def html(text_md):
     if not isinstance(text_md, str):               # list of strings
         logger.debug(f'LIST {text_md}')
-        text_md = ''.join(text_md)
+        text_md = '\n'.join(text_md)
     return markdown.markdown(
         text_md,
     #    extensions=['extra', 'codehilite'],
