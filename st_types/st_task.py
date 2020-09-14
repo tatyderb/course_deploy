@@ -1,5 +1,6 @@
 from pyparsing import Word, OneOrMore, Char, nums
 from pathlib import Path
+
 import logging
 
 from st_types.st_basic import Step, StepType, WRD
@@ -256,6 +257,37 @@ CODE:
         repo = self.params['repo']
         statement = self.params['statement']
 
+        if self.params['statement'] is None:
+            self.text = StepTask.default_text
+        else:
+            logger.debug(f'repo={repo} statement={statement}')
+            st = repo / statement
+            logger.debug(st)
+            xml_text = (repo / statement).read_text(encoding="utf-8")
+            s1 = xml_text.find("<description>") + len('<description>')
+            s2 = xml_text.find("</description>")
+            xml_text = xml_text[s1:s2]
+            '''
+            description = []
+            in_description = False
+            for line in xml_text:
+                if '</descriprion>' in line:
+                    break
+                if in_description:
+                    description.append(line)
+                if '<descriprion>' in line:
+                    in_description = True
+
+            self.text = description
+            '''
+            t = type(xml_text)
+            logger.debug(f"type={t} xml={xml_text}")
+            self.text = xml_text
+        if self.params['tests'] is None:
+            self.test_cases.append(StepTask.default_test)
+        else:
+            self.make_test_list()
+        '''
         if self.params['statement'] is None and self.params['tests'] is None:
             self.text = StepTask.default_text
             self.test_cases.append(StepTask.default_test)
@@ -265,7 +297,7 @@ CODE:
         else:
             self.text = (repo / statement).read_text()
             self.make_test_list()
-
+        '''
         self.code = StepTask.default_code
         self.cost = self.params['score']
         self.samples_count = self.params['visible_tst_num']
