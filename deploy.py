@@ -208,7 +208,7 @@ def deploy_to_stepik(steps, lesson_id, st_num=0, allow_step_types=StepType.FULL)
 
         steps[ind].id = step_ids[ind]
         if steps[ind].step_type & allow_step_types:
-            logger.info(f'UPDATE step {ind}')
+            logger.info(f'UPDATE step {st_num}')
             logger.info(f'UPDATE {steps[ind]}')
             steps[ind].update()
         else:
@@ -345,7 +345,8 @@ def main():
     with open(args.markdown_filename, encoding='utf-8') as fin:
         # First step - all other steps as one page if mode = DEBUG
         str_list = param_substitude(list(fin))
-        steps, lesson_header, lesson_id, lesson_text = parse_lesson(str_list, args.debug)
+        all_steps_to_one = args.debug and args.step == 0
+        steps, lesson_header, lesson_id, lesson_text = parse_lesson(str_list, all_steps_to_one)
 
     # only convert to html, no deploy to site
     if args.html:
