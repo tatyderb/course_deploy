@@ -17,7 +17,7 @@ class StepTask(Step):
                     'block':
                         {
                             'name': 'code',
-                            'options': None,
+                            'options': {},
                             'source':
                                 {
                                     'code': '',
@@ -42,16 +42,88 @@ class StepTask(Step):
                 }
         }
 
-    default_code = ('# This is a sample Code Challenge\n'
-                    '# Learn more: https://stepik.org/lesson/9173\n'
-                    '# Ask your questions via support@stepik.org\n\n'
-                    'def generate():\n'
-                    '    return []\n\n'
-                    'def check(reply, clue):\n'
-                    '    return reply.strip() == clue.strip()\n\n'
-                    '# def solve(dataset):\n'
-                    '#     a, b = dataset.split()\n'
-                    '#     return str(int(a) + int(b))')
+    DEFAULT_CODE = '''
+# This is a sample Code Challenge
+# Learn more: https://stepik.org/lesson/9173
+# Ask your questions via support@stepik.org
+def generate():
+    return []
+def check(reply, clue):
+    return reply.strip() == clue.strip()
+# def solve(dataset):
+#     a, b = dataset.split()
+#     return str(int(a) + int(b))
+'''
+    DEFAULT_CODE_VIEW_ALL_TESTS = '''
+# This is a sample Code Challenge
+# Learn more: https://stepik.org/lesson/9173
+# Ask your questions via support@stepik.org
+def generate():
+    return []
+    
+def check(reply, clue):
+    reply, clue = int(reply), int(clue)
+    if reply == clue:
+        return True
+    feedback = f"You answer was: {reply}. Correct answer was: {clue}"
+    return False, feedback  # feedback will be shown to the learner
+
+# def solve(dataset):
+#     a, b = dataset.split()
+#     return str(int(a) + int(b))
+'''
+    default_code = DEFAULT_CODE_VIEW_ALL_TESTS
+
+    DEFAULT_GENERATE = '''
+def generate():
+    return []
+    '''
+    DEFAULT_SOLVE = '''
+# def solve(dataset):
+#     a, b = dataset.split()
+#     return str(int(a) + int(b))
+    '''
+
+    CHECK_STR = '''
+def check(reply, clue):
+    if reply == '':
+        return False
+    return reply.strip() == clue.strip()
+    '''
+
+    CHECK_INTSEQ_VIEW_ALL_TESTS = '''
+def check(reply, clue):
+    if reply == '':
+        return False
+    reply, clue = int(reply), int(clue)
+    if reply == clue:
+        return True
+    feedback = f"You answer was: {reply}. Correct answer was: {clue}"
+    return False, feedback  # feedback will be shown to the learner
+    '''    
+
+    CHECK_STR_VIEW_ALL_TESTS = '''
+def check(reply, clue):
+    #if reply == '':
+    #    return False
+    #reply, clue = int(reply), int(clue)
+    #if reply == clue:
+    #    return True
+    if reply.strip() == clue.strip():
+        return True
+    feedback = f"You answer was: {reply}. Correct answer was: {clue}"
+    return False, feedback  # feedback will be shown to the learner
+    '''    
+        
+    CHECK_FLOAT = '''
+def check(reply, clue):
+    if reply == '':
+        return False
+    return abs(float(reply) - float(clue)) < {eps}
+    ''' # expected argument eps
+    
+    #DEFAULT_CHECKER = CHECK_STR_VIEW_ALL_TESTS
+    DEFAULT_CHECKER = CHECK_STR_VIEW_ALL_TESTS
 
     default_text = ('<p>Текст по умолчанию.</p>\n'
                     '<p>Напишите программу для сложения чисел<br>\n'
@@ -73,12 +145,17 @@ class StepTask(Step):
         self.footer = ''
         self.lang = None
 
+        self.generate = ''
+        self.checker = ''
+        self.solve = ''
+
         self.params = {
             'name': None,
             'repo': None,
             'statement': None,
-            'checker': None,
-            'solution': None,
+            # 'checker': '',
+            # 'solution': '',
+            # 'generate': '',
             'tests': None,
             'visible_tst_num': None,
             'score': None,
@@ -94,15 +171,46 @@ class StepTask(Step):
 
         d['stepSource']['cost'] = self.cost
         d['stepSource']['block']['text'] = self.text
-        d['stepSource']['block']['source']['code'] = self.code
         d['stepSource']['block']['source']['test_cases'] = self.test_cases
         d['stepSource']['block']['source']['samples_count'] = self.samples_count
-
-        if self.lang is not None:
-            d['stepSource']['block']['source']['templates_data'] = \
-                f'::{self.lang}\n::header\n{self.header}\n::footer\n{self.footer}'
+        
+        d['stepSource']['block']['source']['code'] = self.generator_checker_solver()
+        d['stepSource']['block']['source']['templates_data'] = self.header_footer()
+        d['stepSource']['block']['options']['code_templates'] = self.lang_templates()
 
         return d
+
+    def generator_checker_solver(self):
+        """
+        return generator, checker, solver
+        """
+        generator = self.params.get('generate', StepTask.DEFAULT_GENERATE)
+        checker = self.params.get('checker', StepTask.DEFAULT_CHECKER)
+        solution = self.params.get('solution', StepTask.DEFAULT_SOLVE)
+            
+        return '\n'.join([generator, checker, solution])
+        
+    def lang_templates(self):
+        """ 
+        return template code in IDE
+        """
+        return '::{self.lang}\n{self.template}'
+        
+    def header_footer(self):
+        """ 
+        return template code in IDE
+        "::python3\n::code\n# This is code in lang and templates\n::header\n# This is header\n::footer\n# This is footer\n"
+        """
+        if not self.lang:
+            return ''
+        s = f'::{self.lang}\n'
+        if self.template:
+            s = s + '::code\n' + self.template + '\n'
+        if self.header:
+            s = s + '::header\n' + self.header + '\n'
+        if self.footer:
+            s = s + '::footer\n' + self.footer + '\n'
+        return s
 
     def html(self, position=None):
         if position is None:
@@ -298,7 +406,7 @@ CODE:
             self.text = (repo / statement).read_text()
             self.make_test_list()
         '''
-        self.code = StepTask.default_code
+        # self.code = StepTask.default_code
         self.cost = self.params['score']
         self.samples_count = self.params['visible_tst_num']
 
