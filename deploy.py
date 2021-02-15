@@ -207,7 +207,10 @@ def deploy_to_stepik(steps, lesson_id, st_num=0, allow_step_types=StepType.FULL)
             return
 
         steps[ind].id = step_ids[ind]
-        if steps[ind].step_type & allow_step_types:
+        if steps[ind].step_type == StepType.SKIP:
+            logger.warning(f'MANUAL SKIP UPDATE hstep={steps[ind].id} position={steps[ind].position}')
+  
+        elif steps[ind].step_type & allow_step_types:
             logger.info(f'UPDATE step {st_num}')
             logger.info(f'UPDATE {steps[ind]}')
             steps[ind].update()
@@ -217,7 +220,9 @@ def deploy_to_stepik(steps, lesson_id, st_num=0, allow_step_types=StepType.FULL)
 
     for step_id, step in zip(step_ids, steps):
         step.id = step_id
-        if step.step_type & allow_step_types:
+        if step.step_type == StepType.SKIP:
+            logger.warning(f'MANUAL SKIP UPDATE hstep={step.id} position={step.position}')
+        elif step.step_type & allow_step_types:
             logger.info(f'UPDATE {step_id}')
             logger.debug(f'UPDATE {step}')
             step.update()
