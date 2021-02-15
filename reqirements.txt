@@ -1,0 +1,4 @@
+requests
+markdown
+pyparsing
+pyyaml
