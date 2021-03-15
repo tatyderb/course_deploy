@@ -4,6 +4,7 @@ from st_types.st_basic import Step, StepType
 from st_types.st_number import StepNumber
 from st_types.st_choice import StepMultipleChoice
 from st_types.st_string import StepString
+from st_types.st_free_resp import StepFreeResp
 from st_types.st_task import StepTask
 from st_types.st_taskinline import StepTaskInline
 from st_types.st_skip import StepSkip
@@ -40,6 +41,8 @@ def from_lines(lines, task_root=None, task_lang=None):
         st = StepTask.task_from_md(lines[1:], task_root, task_lang)
     elif stype == 'TASKINLINE':
         st = StepTaskInline.task_from_md(lines[1:])
+    elif stype == 'TASKTEXT':
+        st = StepFreeResp.str_from_md(lines[1:])
     elif stype == 'SKIP':
         st = StepSkip.str_from_md([])
     else:  # Text

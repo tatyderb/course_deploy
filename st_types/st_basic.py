@@ -14,8 +14,9 @@ class StepType:
     NUMBER = 16
     STRING = 32
     TASK = 64
+    FREE_RESP = 128
     SKIP = 0
-    FULL = TEXT | QUESTION | PROBLEM | VIDEO | NUMBER | STRING | TASK
+    FULL = TEXT | QUESTION | PROBLEM | VIDEO | NUMBER | STRING | TASK | FREE_RESP
 
 
 class Step:

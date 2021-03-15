@@ -46,10 +46,20 @@ class StepTask(Step):
 # This is a sample Code Challenge
 # Learn more: https://stepik.org/lesson/9173
 # Ask your questions via support@stepik.org
+# Hint from Илья Ставиди https://stepik.org/lesson/244445/step/6?unit=490603
 def generate():
     return []
 def check(reply, clue):
-    return reply.strip() == clue.strip()
+    # return reply.strip() == clue.strip()
+    res = "\n".join(x.strip() for x in reply.strip().splitlines()) == \
+        '\n'.join(y.strip() for y in clue.strip().splitlines())
+    if res:
+        return True
+    feedback = f"You answer was: {reply}. Correct answer was: {clue}"
+    return False, feedback  # feedback will be shown to the learner
+
+#def check(reply, clue):
+#    return reply.strip() == clue.strip()
 # def solve(dataset):
 #     a, b = dataset.split()
 #     return str(int(a) + int(b))
@@ -62,8 +72,10 @@ def generate():
     return []
     
 def check(reply, clue):
-    reply, clue = int(reply), int(clue)
-    if reply == clue:
+    # return reply.strip() == clue.strip()
+    
+    res = [x.strip() for x in reply.strip().splitlines()] == [y.strip() for y in clue.strip().splitlines()]
+    if res:
         return True
     feedback = f"You answer was: {reply}. Correct answer was: {clue}"
     return False, feedback  # feedback will be shown to the learner
@@ -104,14 +116,11 @@ def check(reply, clue):
 
     CHECK_STR_VIEW_ALL_TESTS = '''
 def check(reply, clue):
-    #if reply == '':
-    #    return False
-    #reply, clue = int(reply), int(clue)
-    #if reply == clue:
-    #    return True
-    if reply.strip() == clue.strip():
+    # return reply.strip() == clue.strip()
+    res = [x.strip() for x in reply.strip().splitlines()] == [y.strip() for y in clue.strip().splitlines()]
+    if res:
         return True
-    feedback = f"You answer was: {reply}. Correct answer was: {clue}"
+    feedback = f"\\nYou answer was: \\n{reply}\\nCorrect answer was: \\n{clue}"
     return False, feedback  # feedback will be shown to the learner
     '''    
         
