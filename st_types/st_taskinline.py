@@ -56,7 +56,7 @@ class StepTaskInline(StepTask):
         text = []
         for line in md_lines:
             print(line)
-            line = line.strip()
+            line = line.rstrip()
             cleanup = True
             if line == 'TEST':
                 st.end_state(mode, text)
