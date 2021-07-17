@@ -14,7 +14,7 @@ class StepFreeResp(Step):
                 'name': 'free-answer',
                 'text': 'Напишите "степик"',  # task text in html
                 "source": {
-                    "is_attachments_enabled": True,
+                    "is_attachments_enabled": False,
                     "is_html_enabled": False,
                     "manual_scoring": False
                 },
