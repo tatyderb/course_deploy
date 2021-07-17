@@ -78,6 +78,9 @@ TYPE может быть следующим:
     Имена dat и ans файлов должны совпадать, нумерация от 001 идет по порядку (без разрывов)
   * Если не будет условия, оно будет заменено на стандартное, 
     если не будет ни условия, ни тестов, то будет загружена стандартная задача
+  * У задачи может быть header и footer. Названия файлов указываются с ними напрямую
+    и включаются в задачу только при указании языка в конфигурационном файле: `task_lang: c`
+  * По умолчанию ученик видит только первый тест. Можно явно указать количество видимых тестов: `visible_tst_num = 4`
 
 * VIDEO - далее идет урл на видео в формате `video=https://d3c33hcgiwev3.cloudfront.net/KYDrAeHNEeiAgQrXx6bp4g.processed/full/360p/index.mp4?Expires=1563753600&Signature=V1YOioA-2y8C52Sf-tHLBnBxfAfu3lP2gUV4eajalMH-lA-uJC1xWPfbfBFOy90BHfoSqxk7raYONL0FlrF18NDaTxLkrKZ~~GB4QD5YxNCEPqug2HQQf4itZkf0M4GkwgPWZX9~QXkJjgX9x0LyhflLCgfCxCrZhY8AnpwgPes_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A`
 
