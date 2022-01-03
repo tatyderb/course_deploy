@@ -1,14 +1,12 @@
 from enum import Enum
 import logging
-from pathlib import Path
-from pyparsing import Word, OneOrMore, Char, nums
 
 from md_utils import html
 from st_types.st_task import StepTask
-from st_types.st_basic import Step, StepType, WRD
 
 
 logger = logging.getLogger('deploy_scripts')
+
 
 def to_text(lines):
     return '\n'.join(lines)
@@ -21,7 +19,8 @@ class InputState(Enum):
     Header = 8      # присоединяемый код до
     Footer = 16     # присоединяемый код после
     Code = 32       # в редакторе питона студентам уже написан этот код
-    #Template = 64   # этот код
+    # Template = 64   # этот код
+
 
 class StepTaskInline(StepTask):
     """ Задача описана непосредственно в md файле 
@@ -33,12 +32,10 @@ class StepTaskInline(StepTask):
     TEMPLATE - начало того, что в окошке кода
     #CODE - начало того, что в окошке кода
     """
-    
-    
-    def __init__(self):
-        super().__init__()
+
+    def __init__(self, lang):
+        super().__init__(lang)
         self.code = StepTask.default_code
-        self.lang = 'python3'
         self.template = None
         
     def __dict__(self):
@@ -46,11 +43,8 @@ class StepTaskInline(StepTask):
         return d
     
     @staticmethod
-    def task_from_md(md_lines, root=None, lang=None):
-        st = StepTaskInline()
-
-        if lang is not None:
-            st.params['lang'] = lang
+    def task_from_md(md_lines, params):
+        st = StepTaskInline(params.get('task_lang'))
 
         mode = InputState.Statement 
         text = []

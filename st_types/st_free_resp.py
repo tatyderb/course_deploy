@@ -2,7 +2,7 @@ import logging
 from pyparsing import OneOrMore
 
 from md_utils import html
-from st_types.st_basic import Step, StepType, WRD, bool_check
+from st_types.st_basic import Step, StepType
 
 logger = logging.getLogger('deploy_scripts')
 

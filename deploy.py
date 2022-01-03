@@ -14,9 +14,8 @@ question in AIKEN format
 import secret_check
 import md_utils
 from st_types.steps import Step, StepType, from_lines
-from st_types.st_basic import WRD, WRD_p
+import parse
 
-from pyparsing import Char, Word, CharsNotIn, ZeroOrMore, nums
 from enum import Enum
 
 import os
@@ -26,30 +25,15 @@ import logging
 
 logger = None
 
-param_dict = {}
-
-
 def is_empty_line(line):
     return not line.strip()
 
 
-def error(message="Error"):
-    raise ValueError(message)
-
-
-def commit_step(steps, lesson_id, lines):
+def commit_step(steps, lesson_id, lines, param_dict):
     """Create Step from lines and append to steps list"""
     # st = Step.from_lines(lines)
 
-    root = None
-    lang = None
-
-    if 'task_root' in param_dict:
-        root = param_dict['task_root']
-    if 'task_lang' in param_dict:
-        lang = param_dict['task_lang']
-
-    st = from_lines(lines, task_root=root, task_lang=lang)
+    st = from_lines(lines, param_dict)
 
     st.lesson_id = lesson_id
     st.position = len(steps) + 1
@@ -68,8 +52,16 @@ def commit_whole_file_as_1_step(steps, lesson_id, lines):
 
 
 def read_params(filename):
+    """Read config file filename in YAML, return dict with default params plus config file"""
+
+    # set default param value here, overwrite by default command lines arguments!!!
+    param_dict = {
+        'task_root': '.',       # Todo
+        'task_lang': 'python3'
+    }
+
     if filename is None:
-        return
+        return param_dict
 
     if not op.exists(filename):
         logger.error(f"Confing file doesn't exist: {filename}")
@@ -80,30 +72,7 @@ def read_params(filename):
         param_dict.update(dictionary)
 
 
-def param_set(tokens):
-    for idx, lex in enumerate(tokens):
-        if tokens[idx] == '{{' and tokens[idx + 1] in param_dict and tokens[idx + 2] == '}}':
-            tokens[idx] = tokens[idx + 2] = ''
-            tokens[idx + 1] = str(param_dict[tokens[idx + 1]])
-    return ' '.join(tokens)
-
-
-def param_substitude(lines):
-    mask_par = (CharsNotIn('{{}}')[0, ] + '{{' + WRD_p + '}}' + CharsNotIn('{{}}')[0, ])[1, ] + Char('\n')[0, 1]
-    mask_par.setParseAction(param_set)
-
-    for line_to, line in enumerate(lines):
-        line = line.rstrip()
-
-        if not line:
-            continue
-
-        lines[line_to] = mask_par.transformString(line)
-
-    return lines
-
-
-def parse_lesson(lines, debug_format=False):
+def parse_lesson(lines, param_dict, debug_format=False):
     """
     Parse lesson document by format:
     # lesson header
@@ -113,14 +82,16 @@ def parse_lesson(lines, debug_format=False):
     step text
     ## next step header
     next step text
-    :param debug_format:
     :param lines:
+    :param param_dict: config dictionary
+    :param debug_format:
     :return: steps=[], lesson_header='', lesson_id=None, lesson_text=''
     """
     class Status(Enum):
-        LESSON_HEADER = 1
-        LESSON_ID = 2
-        LESSON_TEXT = 3
+        LESSON_HEADER = 1       # Начинаем разбирать урок, ждем '# header'  -> LESSON_ID
+        LESSON_ID = 2           # Разбираем 'lesson = number'               -> LESSON_TASK_LANG
+        LESSON_TASK_LANGUAGE = 21   # Не обязательно, разбираем 'lang = язык'   -> LESSON_TEXT
+        LESSON_TEXT = 3         # не обязательно, пояснение к модулю, никуда пока не идет ->
         H2 = 4
         STEP_BODY = 5
 
@@ -131,63 +102,58 @@ def parse_lesson(lines, debug_format=False):
     steps = []
     line_from = 0
 
-    WRDs = ZeroOrMore(WRD)
-
-    sharp = Char('#')
-    not_sh = CharsNotIn('#')
-
-    H2_template = (sharp * 2) + not_sh + WRDs
-    header_template = sharp + not_sh + WRDs
-
     for line_to, line in enumerate(lines):
         line = line.rstrip()
 
         if not line:
             continue
 
+        # optional states, should by processed before mandatory
+        if status == Status.LESSON_TASK_LANGUAGE:
+            task_language = parse.parse_task_language(line)
+            logger.info(f'task_language={task_language}')
+            if task_language is None:                       # уже или описание урока, или первый шаг
+                line_from = line_to
+            else:                                           # определен task_language, описание со следующей строки
+                line_from = line_to + 1
+                param_dict['task_lang'] = task_language
+
+            # process the first step
+            status = Status.LESSON_TEXT
+
+
+        # mandatory states
         if status == Status.LESSON_HEADER:                          # # lesson header
-            if not line == header_template:
-                error(f'Expect lesson header # text, status={status}, now = {line}')
-
-            m = header_template.parseString(line)
-            lesson_header = m[1]
-
+            lesson_header = parse.parse_lesson_header(line)
             logger.info(f'lesson_header = {lesson_header}')
             status = Status.LESSON_ID
 
         elif status == Status.LESSON_ID:                            # lesson = lesson_id
-
-            id_template = 'lesson' + Char('=') + Word(nums)
-
-            if not line == id_template:
-                error(f'Expect lesson header # text, status={status}, now = {line}')
-
-            lesson = id_template.parseString(line)
-            lesson_id = int(lesson[2])
-
+            lesson_id = parse.parse_lesson_id(line)
             logger.info(f'lesson_id={lesson_id}')
-            status = Status.LESSON_TEXT
-            line_from = line_to
-            # add whole file as the first step:
-            if debug_format:
-                commit_whole_file_as_1_step(steps, lesson_id, lines)
+            status = Status.LESSON_TASK_LANGUAGE
 
         elif status == Status.LESSON_TEXT:                          # text before first h2
-            if line == H2_template:
+            if parse.is_H2(line):
                 lesson_text = md_utils.html(lines[line_from: line_to])
                 status = Status.H2
                 line_from = line_to
 
+                # add whole file as the first step:
+                if debug_format:
+                    commit_whole_file_as_1_step(steps, lesson_id, lines)
+
         elif status == Status.STEP_BODY:
-            if line == H2_template:
-                commit_step(steps, lesson_id, lines[line_from: line_to])
+            if parse.is_H2(line):
+                commit_step(steps, lesson_id, lines[line_from: line_to], param_dict)
                 status = Status.H2
                 line_from = line_to
 
         elif status == Status.H2:
             status = Status.STEP_BODY
 
-    commit_step(steps, lesson_id, lines[line_from:])
+    # commit last step
+    commit_step(steps, lesson_id, lines[line_from:], param_dict)
 
     return steps, lesson_header, lesson_id, lesson_text
 
@@ -241,12 +207,9 @@ def deploy_to_stepik(steps, lesson_id, st_num=0, allow_step_types=StepType.FULL)
     # delete obligatory steps if needed
     elif len_site > len_data:
         for step_id in step_ids[len_data:]:
-            if step.step_type & allow_step_types:
-                logger.info(f'DELETE {step_id}')
-                Step.delete_by_id(step_id)
-            else:
-                logger.warning(f'SKIP DELETE step={step.id} position={step.position}')
-            
+            logger.info(f'DELETE {step_id}')
+            Step.delete_by_id(step_id)
+
 
 def print_to_html_file(md_filename, steps, allow_step_types=StepType.FULL):
     """
@@ -322,6 +285,9 @@ def main():
     parser.add_argument('-s', '--step', type=int, default=0,
                         help='update only the step N, start N from 1, negative numbers are allowed too')
     parser.add_argument('-c', '--config', type=str, default=None, help='deploy with config file')
+    # TODO
+    parser.add_argument('-l', '--lang', type=str, default=None,
+        help='programming language for code tasks (python3, c, c_valgrind or more in https://stepik.org/lesson/63139/step/11')
 
     args = parser.parse_args()
 
@@ -342,22 +308,30 @@ def main():
         logger.info('deploy TEXT only')
         deployed_step_types = StepType.TEXT
     else:
-        logger.info('deploy all by default')
+        logger.info('deploy all by default (full)')
         deployed_step_types = StepType.FULL
 
-    read_params(args.config)
+    # collect all params in params_dict from config file, CLI.
+    param_dict = read_params(args.config)
+    logger.info(f'param_dict={param_dict}')
+
+    if args.lang:
+        param_dict['task_lang'] = args.lang
 
     with open(args.markdown_filename, encoding='utf-8') as fin:
         # First step - all other steps as one page if mode = DEBUG
-        str_list = param_substitude(list(fin))
+        str_list = parse.param_substitude(list(fin), param_dict)
         all_steps_to_one = args.debug and args.step == 0
-        steps, lesson_header, lesson_id, lesson_text = parse_lesson(str_list, all_steps_to_one)
+        steps, lesson_header, lesson_id, lesson_text = \
+            parse_lesson(str_list, param_dict, all_steps_to_one)
 
     # only convert to html, no deploy to site
     if args.html:
         print_to_html_file(args.markdown_filename, steps, allow_step_types=deployed_step_types)
     else:
         deploy_to_stepik(steps, lesson_id, st_num=args.step, allow_step_types=deployed_step_types)
+
+    logger.info(f'param_dict={param_dict}')
 
 
 if __name__ == '__main__':

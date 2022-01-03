@@ -18,11 +18,12 @@ logger = logging.getLogger('deploy_scripts')
 # POST and PUT requests for updata and create step with /api/step-sources/{step_id}
 
 
-def from_lines(lines, task_root=None, task_lang=None):
+def from_lines(lines, param_dict):
     """Create Step object from lines of markdown text, first line has
     ## [QUIZ] text
     return Step object
     """
+
     lines[0] = lines[0].strip()
     # ## text | ## long text | ## QUIZ text
     h2, stype, *a = lines[0].split()
@@ -30,19 +31,21 @@ def from_lines(lines, task_root=None, task_lang=None):
         logger.error('Expected step header format "## [QUIZ] text"')
         logger.error(f"now: {lines[0]}")
         return None
+        
+    text_lines = [h2 + ' ' + ' '.join(a) + '\n' ] + lines[1:]
 
     if stype == 'QUIZ':
-        st = StepMultipleChoice.from_aiken(lines[1:])
+        st = StepMultipleChoice.from_aiken(text_lines)
     elif stype == 'NUMBER':
-        st = StepNumber.num_from_md(lines[1:])
+        st = StepNumber.num_from_md(text_lines)
     elif stype == 'STRING':
-        st = StepString.str_from_md(lines[1:])
+        st = StepString.str_from_md(text_lines)
     elif stype == 'TASK':
-        st = StepTask.task_from_md(lines[1:], task_root, task_lang)
+        st = StepTask.task_from_md(text_lines, param_dict)
     elif stype == 'TASKINLINE':
-        st = StepTaskInline.task_from_md(lines[1:])
+        st = StepTaskInline.task_from_md(text_lines, param_dict)
     elif stype == 'TASKTEXT':
-        st = StepFreeResp.str_from_md(lines[1:])
+        st = StepFreeResp.str_from_md(text_lines)
     elif stype == 'SKIP':
         st = StepSkip.str_from_md([])
     else:  # Text

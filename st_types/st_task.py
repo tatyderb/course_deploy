@@ -1,9 +1,9 @@
-from pyparsing import Word, OneOrMore, Char, nums
+from pyparsing import Word, OneOrMore, Char, nums, alphanums
 from pathlib import Path
 
 import logging
 
-from st_types.st_basic import Step, StepType, WRD
+from st_types.st_basic import Step, StepType
 
 
 logger = logging.getLogger('deploy_scripts')
@@ -142,7 +142,7 @@ def check(reply, clue):
 
     Root = Path('examples')
 
-    def __init__(self):
+    def __init__(self, lang):
         super().__init__()
         self.cost = Step.Cost.DEFAULT_TASK
         self.text = ''
@@ -152,7 +152,7 @@ def check(reply, clue):
         self.samples_count = Step.DEAFAULT_TST_NUM
         self.header = ''
         self.footer = ''
-        self.lang = None
+        self.lang = lang
 
         self.generate = ''
         self.checker = ''
@@ -433,18 +433,16 @@ CODE:
                 self.add_sample(data.read_text(), ans.read_text())
 
     @staticmethod
-    def task_from_md(md_lines, root=None, lang=None):
-        st = StepTask()
+    def task_from_md(md_lines, params):
+        st = StepTask(params.get('task_lang'))
 
-        if root is None:
-            root = StepTask.Root
+        if 'task_root' in params:
+            root = Path(params['task_root'])
         else:
-            root = Path(root)
+            root = StepTask.Root
 
-        if lang is not None:
-            st.params['lang'] = lang
-
-        WRDs = OneOrMore(WRD)
+        # TODO вынести в parse.py и избавиться от перечислений (свернуть код?) и разрешить русские буквы в пути к файлам
+        WRDs = OneOrMore(alphanums)
         equality = Char('=') + WRDs
 
         name_template = 'name' + equality

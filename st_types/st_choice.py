@@ -3,7 +3,8 @@ from enum import Enum
 from pyparsing import ZeroOrMore, OneOrMore, Char, alphas
 
 from md_utils import html
-from st_types.st_basic import Step, StepType, WRD, bool_check
+from st_types.st_basic import Step, StepType
+from parse import WRD, bool_check
 
 logger = logging.getLogger('deploy_scripts')
 
