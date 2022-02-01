@@ -49,6 +49,7 @@ class StepTask(Step):
 # Hint from Илья Ставиди https://stepik.org/lesson/244445/step/6?unit=490603
 def check(reply, clue):
     # return reply.strip() == clue.strip()
+    HUGE_DATA = 1024
     res = [x.strip() for x in reply.strip().splitlines()] == [y.strip() for y in clue.strip().splitlines()]
     if res:
         return True
@@ -65,7 +66,13 @@ def check(reply, clue):
                 linenum += 1
                 if x != y:
                     diff = f"Diff at line {linenum}: answer=<{x}>, expected=<{y}>"
-    feedback = f"\\nYou answer was: \\n{reply}\\nCorrect answer was: \\n{clue}\\n{diff}\\n"
+    if len_repl > HUGE_DATA or len_expect > HUGE_DATA:
+        if len(diff) > HUGE_DATA:
+            feedback = "Too long diff, more {HUGE_DATA}"
+        else:
+            feedback = diff
+    else:
+        feedback = f"\\nYou answer was: \\n{reply}\\nCorrect answer was: \\n{clue}\\n{diff}\\n"
     return False, feedback  # feedback will be shown to the learner
 
 #def check(reply, clue):
