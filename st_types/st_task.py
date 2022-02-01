@@ -47,15 +47,25 @@ class StepTask(Step):
 # Learn more: https://stepik.org/lesson/9173
 # Ask your questions via support@stepik.org
 # Hint from Илья Ставиди https://stepik.org/lesson/244445/step/6?unit=490603
-def generate():
-    return []
 def check(reply, clue):
     # return reply.strip() == clue.strip()
-    res = "\n".join(x.strip() for x in reply.strip().splitlines()) == \
-        '\n'.join(y.strip() for y in clue.strip().splitlines())
+    res = [x.strip() for x in reply.strip().splitlines()] == [y.strip() for y in clue.strip().splitlines()]
     if res:
         return True
-    feedback = f"You answer was: {reply}. Correct answer was: {clue}"
+    else:
+        repl = [x.strip() for x in reply.strip().splitlines()]
+        expect = [y.strip() for y in clue.strip().splitlines()]
+        len_repl = len(repl)
+        len_expect = len(expect)
+        if len_repl != len_expect:
+            diff = f'Differ line numbers: answer={len_repl}, expected={len_expect}'
+        else:
+            linenum = 0
+            for x, y in zip(repl, expect):
+                linenum += 1
+                if x != y:
+                    diff = f"Diff at line {linenum}: answer=<{x}>, expected=<{y}>"
+    feedback = f"\\nYou answer was: \\n{reply}\\nCorrect answer was: \\n{clue}\\n{diff}\\n"
     return False, feedback  # feedback will be shown to the learner
 
 #def check(reply, clue):
@@ -64,26 +74,7 @@ def check(reply, clue):
 #     a, b = dataset.split()
 #     return str(int(a) + int(b))
 '''
-    DEFAULT_CODE_VIEW_ALL_TESTS = '''
-# This is a sample Code Challenge
-# Learn more: https://stepik.org/lesson/9173
-# Ask your questions via support@stepik.org
-def generate():
-    return []
-    
-def check(reply, clue):
-    # return reply.strip() == clue.strip()
-    
-    res = [x.strip() for x in reply.strip().splitlines()] == [y.strip() for y in clue.strip().splitlines()]
-    if res:
-        return True
-    feedback = f"You answer was: {reply}. Correct answer was: {clue}"
-    return False, feedback  # feedback will be shown to the learner
-
-# def solve(dataset):
-#     a, b = dataset.split()
-#     return str(int(a) + int(b))
-'''
+    DEFAULT_CODE_VIEW_ALL_TESTS = DEFAULT_CODE
     default_code = DEFAULT_CODE_VIEW_ALL_TESTS
 
     DEFAULT_GENERATE = '''
@@ -132,7 +123,7 @@ def check(reply, clue):
     ''' # expected argument eps
     
     #DEFAULT_CHECKER = CHECK_STR_VIEW_ALL_TESTS
-    DEFAULT_CHECKER = CHECK_STR_VIEW_ALL_TESTS
+    DEFAULT_CHECKER = DEFAULT_CODE_VIEW_ALL_TESTS
 
     default_text = ('<p>Текст по умолчанию.</p>\n'
                     '<p>Напишите программу для сложения чисел<br>\n'
