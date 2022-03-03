@@ -212,7 +212,7 @@ def check(reply, clue):
             return ''
         s = f'::{self.lang}\n'
         if self.template:
-            s = s + '::code\n' + self.template + '\n'
+            s = s + '\n' + self.template + '\n'
         if self.header:
             s = s + '::header\n' + self.header + '\n'
         if self.footer:
