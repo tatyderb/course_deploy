@@ -3,6 +3,7 @@ import logging
 
 from md_utils import html
 from st_types.st_task import StepTask
+from parse import parse_config
 
 
 logger = logging.getLogger('deploy_scripts')
@@ -19,6 +20,7 @@ class InputState(Enum):
     Header = 8      # присоединяемый код до
     Footer = 16     # присоединяемый код после
     Code = 32       # в редакторе питона студентам уже написан этот код
+    Config = 64     # мелкие однострочные параметры: checker, score, etc
     # Template = 64   # этот код
 
 
@@ -64,6 +66,9 @@ class StepTaskInline(StepTask):
             elif line == 'CODE':
                 st.end_state(mode, text)
                 mode = InputState.Code
+            elif line == 'CONFIG':
+                st.end_state(mode, text)
+                mode = InputState.Config
             #elif line == 'TEMPLATE':
             #    st.end_state(mode, text)
             #    mode = InputState.Template
@@ -102,9 +107,15 @@ class StepTaskInline(StepTask):
         elif mode == InputState.Code :
             self.template = to_text(text)
             print(f'template = {self.template}')
+        elif mode == InputState.Config:
+            d = parse_config(text)
+            self.config.update(d)
+            print(f'config = {self.config}')
         else:
             logger.warning(f'Unexpected inline task state={mode}')
-    
+
+
+
 '''
 {
     "stepSource": {

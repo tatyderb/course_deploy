@@ -131,3 +131,25 @@ def parse_task_language(line):
         lang = lang_tokens[2]
     return lang
 
+def parse_config(text):
+    d = {}
+    for line in text:
+        s = line.strip()
+        if not s:
+            continue
+        param, sep, value = s.partition(':')
+        if not sep:
+            logger.error(f"Cannot parse config part at line <{line}>")
+        else:
+            d[param.strip()] = value.strip()
+    '''
+    # не подошел разбор через pyparse, ибо там задание вида additional_params: EPS = 0.1
+    # с пробелами и прочими символами.
+    set_property_template = Word('_' + alphanums) + Char(':') + Word('_' + alphanums)
+    for line in text:
+        if line == set_property_template:
+            tokens = set_property_template.parseString(line)
+            logger.info(f'tokens: {tokens}')
+            d[tokens[0]] = tokens[2]
+    '''
+    return d

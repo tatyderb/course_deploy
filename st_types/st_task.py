@@ -10,6 +10,7 @@ logger = logging.getLogger('deploy_scripts')
 
 
 class StepTask(Step):
+
     DATA_TEMPLATE = \
         {
             'stepSource':
@@ -122,15 +123,49 @@ def check(reply, clue):
     return False, feedback  # feedback will be shown to the learner
     '''    
         
-    CHECK_FLOAT = '''
+    STD_CHECKER_FLOAT_SEQ = '''
+EPS = 0.0001    # default accuracy
+def get_word_seq(text):
+    return text.split()
+    
+
+def check_float_seq(reply, clue):
+    try:
+        reply_data = [float(x) for x in get_word_seq(reply)]
+        clue_data = [float(x) for x in get_word_seq(clue)]
+    except ValueError:
+        return False, f'\\nERROR: Only numbers are expected\\nYou answer was: \\n{reply}\\nCorrect answer was: \\n{clue}\\n'
+
+    reply_len = len(reply_data)
+    clue_len = len(clue_data)
+    res = True
+    diff = ''
+    if reply_len != clue_len:
+        res = False
+        diff = f'Answer = {reply_len} numbers, expected = {clue_len} numbers'
+    else:
+        i = 0
+        for x, y in zip(reply_data, clue_data):
+            i += 1
+            if abs(x - y) > EPS:
+                diff = f"Diff at {i}-th number: answer=<{x}>, expected=<{y}> accuracy={EPS}"
+                res = False
+                break
+    feedback = f"\\nYou answer was: \\n{reply}\\nCorrect answer was: \\n{clue}\\n{diff}\\n"
+    return res, feedback  # feedback will be shown to the learner
+
 def check(reply, clue):
-    if reply == '':
-        return False
-    return abs(float(reply) - float(clue)) < {eps}
+    return check_float_seq(reply, clue)
     ''' # expected argument eps
     
     #DEFAULT_CHECKER = CHECK_STR_VIEW_ALL_TESTS
     DEFAULT_CHECKER = DEFAULT_CODE_VIEW_ALL_TESTS
+
+    STD_CHECKER = {
+        '': DEFAULT_CHECKER,
+        'std_float_seq': STD_CHECKER_FLOAT_SEQ
+    }
+
 
     default_text = ('<p>Текст по умолчанию.</p>\n'
                     '<p>Напишите программу для сложения чисел<br>\n'
@@ -189,18 +224,23 @@ def check(reply, clue):
 
     def generator_checker_solver(self):
         """
-        return generator, checker, solver
+        return generator, checker, solver, additional params for checker, EPS e.g
         """
         generator = self.params.get('generate', StepTask.DEFAULT_GENERATE)
-        checker = self.params.get('checker', StepTask.DEFAULT_CHECKER)
+        checker = StepTask.STD_CHECKER[self.config.get('checker', self.params.get('checker', ''))]
         solution = self.params.get('solution', StepTask.DEFAULT_SOLVE)
+        additional_params = self.config.get('additional_params', '')
             
-        return '\n'.join([generator, checker, solution])
-        
+        return '\n'.join([generator, checker, solution, additional_params])
+
     def lang_templates(self):
         """ 
         return template code in IDE
         """
+        # No restrictions about language
+        if self.lang == 'all':
+            return ''
+
         return '::{self.lang}\n{self.template}'
         
     def header_footer(self):
