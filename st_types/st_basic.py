@@ -47,6 +47,7 @@ class Step:
         self.position = 0  # step position in lesson, from 1
         self.text = ''
         self.step_type = StepType.TEXT
+        self.config = {}
 
     def __repr__(self):
         return repr(self.dict())
