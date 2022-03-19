@@ -85,9 +85,10 @@ CORRECT = {corrects}
         ans_template = 'ANSWER:' + OneOrMore(Char(alphas) + Char(',')[0, 1])
 
         class Status(Enum):
-            QUESTION = 0
-            VARIANT = 1
-            ANSWER = 3
+            QUESTION = 0    # вопрос, в котором проверяется, не начались ли перечисления вариантов
+            VARIANT = 1     # A) или A. как начало варианта ответа
+            ANSWER = 3      # ANSWER: A,C перечисление правильных ответов
+            TEXT = 4        # вопрос, который точно текст от TEXTBEGIN до TEXTEND (чтобы не сработало ложное распознавание начала варианта)
 
         letter_seq = []  # letter sequence from aiken variant, A, B, C, D, etc
         md_part = []
@@ -109,8 +110,18 @@ CORRECT = {corrects}
                 st.preserve_order = not bool_check('SHUFFLE', line)  # единсвенная проблема в том, что при неправильном написании true или false будет автоматом ставиться true
                 continue
 
-            # variant begin by A) or A.
-            if line == opt_template:
+            # в TEXTBEGIN .. TEXTEND принудительно заключаем текст вопроса, если он может внезапно распознаться
+            # как вариант ответа, например, начаться с t.fd(100)
+            if line.startswith('TEXTBEGIN'):
+                status = Status.TEXT
+                continue
+
+            if line.startswith('TEXTEND'):
+                status = Status.QUESTION
+                continue
+
+            # variant begin by A) or A. after Question part or after other variant
+            if line == opt_template and (status == Status.QUESTION or status == Status.VARIANT):
                 opt = opt_template.parseString(line)
 
                 letter = opt[0]
