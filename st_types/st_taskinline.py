@@ -88,7 +88,8 @@ class StepTaskInline(StepTask):
         
         if not mode == InputState.TestIn:
             st.end_state(mode, text)
-        
+
+        st.text += st.open_visible_tests(st.config.get('visible_tests'))
         return st
         
     def end_state(self, mode, text):

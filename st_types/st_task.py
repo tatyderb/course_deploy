@@ -11,6 +11,9 @@ logger = logging.getLogger('deploy_scripts')
 
 class StepTask(Step):
 
+    HUGE_TEST_DATA_LEN = 1024       # строки длиннее этой не показываются в тестовых данных
+    HUGE_TEST_DATA_TEXT = "Слишком большие тестовые данные..."
+
     DATA_TEMPLATE = \
         {
             'stepSource':
@@ -529,6 +532,53 @@ CODE:
                 footer = footer_template.parseString(line)[2]
                 st.params['footer'] = footer
 
+        st.params['statement'] += st.open_visible_tests()
         st.set_attrs()
 
         return st
+
+    @classmethod
+    def cut_test_data(cls, text):
+        """Если (тестовые) данные слишком длинные вместо них будет сообщение "слишком большие данные" """
+        return text if len(text) < cls.HUGE_TEST_DATA_LEN else cls.HUGE_TEST_DATA_TEXT
+
+    def open_visible_tests(self, test_limit=None):
+        """
+        Issue #54
+        Добавляет в условие задачи не более test_limt тестов (или все, если None)
+        <details>
+        <summary>Тестовые данные</summary>
+        что надо свернуть
+        </detals>
+        https://developer.mozilla.org/ru/docs/Web/HTML/Element/details
+        :return: тестовые данные в формате html
+        """
+        DETAILS_BEGIN = '<details><summary>Тестовые данные</summary>\n'
+        DETAILS_END = '</details>\n'
+
+        TEST_STEP_TEMPLETE = '''
+        <h4>Test #{n} input</h4>
+        <pre>{input}</pre>
+        <h4>Test #{n} output</h4>
+        <pre>{output}</pre>
+        '''
+        if not test_limit is None:
+            test_limit = int(test_limit)
+
+        HIDDEN_TESTS = '' if test_limit is None or len(self.test_cases) <= test_limit else \
+            '<b>Остальные тесты закрыты</b>\n'
+
+        tests = \
+            DETAILS_BEGIN + \
+            '\n'.join([TEST_STEP_TEMPLETE.format(
+                    n=num+1,
+                    input=self.cut_test_data(tst[0]),
+                    output=self.cut_test_data(tst[1])
+                    )
+                    for num, tst in enumerate(self.test_cases) \
+                    if test_limit is None or num < test_limit]) + \
+            HIDDEN_TESTS + \
+            DETAILS_END
+
+        print(f'\n\n\nTEST DETAILS:{tests}\n-----------\n')
+        return tests
