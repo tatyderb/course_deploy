@@ -180,7 +180,7 @@ def check(reply, clue):
 
     def __init__(self, lang):
         super().__init__()
-        self.cost = Step.Cost.DEFAULT_TASK
+        # self.cost = Step.Cost.DEFAULT_TASK
         self.text = ''
         self.code = ''
         self.name = 'code'
@@ -203,7 +203,7 @@ def check(reply, clue):
             # 'generate': '',
             'tests': None,
             'visible_tst_num': None,
-            'score': None,
+            'score': Step.Cost.DEFAULT_TASK,
             'lang': None,
             'header': None,
             'footer': None
@@ -214,7 +214,7 @@ def check(reply, clue):
     def dict(self):
         d = super().dict()
 
-        d['stepSource']['cost'] = self.cost
+        d['stepSource']['cost'] = self.config.get('score', self.params['score'])
         d['stepSource']['block']['text'] = self.text
         d['stepSource']['block']['source']['test_cases'] = self.test_cases
         d['stepSource']['block']['source']['samples_count'] = self.samples_count
@@ -285,7 +285,9 @@ CODE:
 
         question = self.text if self.text != '' else StepTask.default_text
 
-        return HTML.format(position, question=question, cost=self.cost, tests=tests, code=code)
+        score = self.params.get('score', self.config.get('score', self.cost))
+
+        return HTML.format(position, question=question, cost=score, tests=tests, code=code)
 
     def add_sample(self, str_in, str_out):
         sample = [str_in, str_out]

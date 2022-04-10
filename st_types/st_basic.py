@@ -48,6 +48,7 @@ class Step:
         self.text = ''
         self.step_type = StepType.TEXT
         self.config = {}
+        self.score = Step.Cost.DEFAULT
 
     def __repr__(self):
         return repr(self.dict())
@@ -76,6 +77,7 @@ class Step:
         src = d['stepSource']
         src['lesson'] = self.lesson_id
         src['position'] = self.position
+        src['cost'] = self.score
         src['block']['text'] = self.text
         src['block']['name'] = self.name
         return d
